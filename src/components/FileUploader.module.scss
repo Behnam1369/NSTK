@@ -1,0 +1,30 @@
+.div {
+  background-color: whitesmoke;
+  border: solid 1px rgb(191, 191, 216);
+  border-radius: 15px;
+  cursor: pointer;
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+  width: 500px;
+
+  p {
+    margin: 5px;
+    text-align: center;
+  }
+
+  p.uploaded {
+    display: flex;
+    justify-content: space-between;
+    padding-left: 10px;
+    .clear {
+      font-size: 16px;
+      background-color: #9180cb;
+      color: #fff;
+      padding: 3px;
+      border-radius: 50%;
+    }
+
+    .clear:hover {
+      background-color: #6b5a9c;
+    }
+  }
+}
