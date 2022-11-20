@@ -1,23 +1,23 @@
-import logo from './logo.svg';
-import './App.css';
+import { useState } from "react";
+import FileUploader from "./components/FileUploader";
 
 function App() {
+  const defaultFile = {
+    IdAttachment: 21025,
+    Title: "",
+    Name: "uf21025_PR-401-0230__1401-08-23_Darkhast_pardakht_-_IRISL__-_Keshtirani_jomhoori_eslami_iran_-_Hazine_haml.pdf",
+    Size: 1500,
+    UploadDate: "",
+  };
+  const [file, setFile] = useState(defaultFile);
+  console.log(file);
+  const handleFileUpdate = (file) => {
+    setFile(file);
+  };
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <FileUploader file={file} onChange={(f) => handleFileUpdate(f)} />
     </div>
   );
 }
