@@ -5,10 +5,16 @@
   cursor: pointer;
   font-family: Verdana, Geneva, Tahoma, sans-serif;
   width: 500px;
+  margin: 5px 0;
 
   p {
     margin: 5px;
     text-align: center;
+
+    .fileSize {
+      font-size: 14px;
+      padding-left: 10px;
+    }
   }
 
   p.uploaded {
@@ -17,14 +23,14 @@
     padding-left: 10px;
     .clear {
       font-size: 16px;
-      background-color: #9180cb;
+      background-color: #a292d6;
       color: #fff;
       padding: 3px;
       border-radius: 50%;
     }
 
     .clear:hover {
-      background-color: #6b5a9c;
+      background-color: #8775bf;
     }
   }
 }

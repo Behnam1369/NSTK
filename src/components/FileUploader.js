@@ -1,4 +1,4 @@
-import react, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { host } from "../Utils/host";
 import { MdOutlineAttachFile, MdOutlineClear } from "react-icons/md";
@@ -12,7 +12,7 @@ export default function FileUploader(props) {
   const fileInput = useRef();
 
   useEffect(() => {
-    if (props.file) {
+    if (props.file && props.file.IdAttachment) {
       setFile({
         name: props.file.Name,
         size: props.file.Size,
@@ -115,14 +115,14 @@ export default function FileUploader(props) {
       {uploadState === "Uploaded" && (
         <p className={style.uploaded}>
           <span title={file.name}>
-            {file.name.length > 30
-              ? file.name.substring(0, 30) + "..."
+            {file.name.length > 35
+              ? file.name.substring(0, 35) + "..."
               : file.name}
-            {<span style={{ color: "purple" }}> ({fileSize(file)})</span>}
+            {<span className={style.fileSize}> ({fileSize(file)})</span>}
           </span>
           <MdOutlineClear
             className={style.clear}
-            title="Remove file"
+            title="Clear file"
             onClick={(e) => {
               handleClear(e);
             }}
