@@ -1,0 +1,36 @@
+.div {
+  background-color: whitesmoke;
+  border: solid 1px rgb(191, 191, 216);
+  border-radius: 15px;
+  cursor: pointer;
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+  width: 500px;
+  margin: 5px 0;
+
+  p {
+    margin: 5px;
+    text-align: center;
+
+    .fileSize {
+      font-size: 14px;
+      padding-left: 10px;
+    }
+  }
+
+  p.uploaded {
+    display: flex;
+    justify-content: space-between;
+    padding-left: 10px;
+    .clear {
+      font-size: 16px;
+      background-color: #a292d6;
+      color: #fff;
+      padding: 3px;
+      border-radius: 50%;
+    }
+
+    .clear:hover {
+      background-color: #8775bf;
+    }
+  }
+}

@@ -1,0 +1,32 @@
+.row {
+  display: flex;
+  align-items: center;
+
+  .remove {
+    color: maroon;
+    font-size: 20px;
+    padding-left: 10px;
+  }
+
+  .remove:hover {
+    color: red;
+    cursor: pointer;
+  }
+}
+
+.add {
+  background-color: white;
+  border: solid 1px #5e0bd2;
+  color: #5e0bd2;
+  width: 530px;
+  padding: 10px;
+  font-size: 18px;
+  border-radius: 5px;
+  margin: 5px 0;
+}
+
+.add:hover {
+  background-color: #5e0bd2;
+  color: white;
+  cursor: pointer;
+}
