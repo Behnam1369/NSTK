@@ -1,6 +1,7 @@
 import { useState } from "react";
+import Datepicker from "./components/Datepicker";
 // import FileUploader from "./components/FileUploader";
-import MultiFileUploader from "./components/MultiFileUploader";
+// import MultiFileUploader from "./components/MultiFileUploader";
 
 function App() {
   const defaultFiles = [];
@@ -10,9 +11,19 @@ function App() {
     setFiles(files);
   };
 
+  const [date, setDate] = useState("2022-11-23");
+  console.log(date);
+
   return (
     <div className="App">
-      <MultiFileUploader files={files} onChange={(f) => handleFileUpdate(f)} />
+      {/* <MultiFileUploader files={files} onChange={(f) => handleFileUpdate(f)} /> */}
+      <Datepicker
+        calformat="jalali"
+        name=""
+        value={date}
+        onChange={() => setDate}
+      />
+      <p>Behnam Aghaali is a wonderful programmer</p>
     </div>
   );
 }

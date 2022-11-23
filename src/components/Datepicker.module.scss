@@ -1,0 +1,171 @@
+@import "../public.scss";
+$main: #021e5f;
+$secondary: #6e7fa6;
+$weekday: #2342a8;
+
+.datepicker.gregorian {
+  input,
+  div,
+  .day {
+    font-family: Helvetica;
+    font-weight: Bold;
+  }
+
+  .eqDate {
+    font-family: "IranSans";
+  }
+}
+
+.datepicker.jalali {
+  input,
+  div,
+  .day {
+    font-family: "IranSans";
+    font-weight: normal;
+  }
+
+  .eqDate {
+    font-family: Helvetica;
+  }
+}
+
+.datepicker {
+  .wrapper {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    width: 290px;
+    input {
+      outline: none;
+      width: 100px;
+      height: 20px;
+      text-align: center;
+      font-size: 14px;
+      // font-family: Helvetica;
+      border: solid 1px #6e7fa6;
+      border-radius: 5px;
+    }
+
+    .calendar_icon {
+      color: $secondary;
+      font-size: 23px;
+      margin: 0 5px;
+    }
+
+    .calendar_icon:hover {
+      color: $main;
+      cursor: pointer;
+    }
+
+    .eqDate {
+      font-size: 14px;
+      color: $secondary;
+      margin: 0 5px;
+    }
+  }
+
+  .calendar {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    position: absolute;
+    background-color: $main;
+    color: white;
+    z-index: 10;
+
+    .arrow {
+      text-align: center;
+      width: 30px;
+      height: 30px;
+      border: 0.1px solid $secondary;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transition: all 0.1s ease-in-out;
+      cursor: pointer;
+      &:hover {
+        background-color: yellow;
+        color: black;
+      }
+    }
+
+    > .year,
+    > .month {
+      grid-column: 2 / 5;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 0.1px solid $secondary;
+    }
+    .switch,
+    .close {
+      border: solid 0.1px $secondary;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 18px;
+      transition: all 0.1s ease-in-out;
+      cursor: pointer;
+      &:hover {
+        background-color: yellow;
+        color: black;
+      }
+    }
+
+    .today {
+      grid-column: 6 / 8;
+      border: solid 0.1px $secondary;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transition: all 0.1s ease-in-out;
+      cursor: pointer;
+      &:hover {
+        background-color: yellow;
+        color: black;
+      }
+    }
+
+    .weekday {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 30px;
+      width: 30px;
+      border: 0.1px solid $secondary;
+      background-color: $weekday;
+      color: white;
+    }
+
+    .day.main {
+      background-color: $secondary;
+    }
+
+    .day.other {
+      background-color: whitesmoke;
+      color: silver;
+    }
+
+    .day.selected {
+      background-color: $main;
+      color: white;
+      font-weight: bold;
+    }
+
+    .day {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 30px;
+      width: 30px;
+      border: 0.1px solid #ccc;
+      cursor: pointer;
+      transition: all 0.1s ease-in-out;
+      font-size: 17px;
+      &:hover {
+        background-color: $main;
+        color: white;
+      }
+    }
+  }
+}
