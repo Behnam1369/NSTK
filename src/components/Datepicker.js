@@ -44,6 +44,10 @@ export default function Datepicker(props) {
     setInputValue(formatDate(date));
   }, [calformat]);
 
+  useEffect(() => {
+    props.onChange(date);
+  }, [date]);
+
   const months = [
     { name: "January", days: 31 },
     { name: "February", days: 28 },
