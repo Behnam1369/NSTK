@@ -1,3 +1,12 @@
+$main-color: #0030b5;
+$c1: #e6e6ef;
+$c2: #39498f;
+
+html,
+body {
+  background-color: whitesmoke;
+}
+
 @font-face {
   font-family: IranSans;
   src: url("../public/fonts/IranSans.ttf");
