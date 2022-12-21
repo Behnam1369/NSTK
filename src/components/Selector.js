@@ -72,7 +72,7 @@ function Selector(props) {
 
   const [ulContainerStyle, setUlContainerStyle] = useState({
     width: props.width - 2 + "px",
-    top: rect.y + rect.height,
+    top: rect.y + rect.height + window.scrollY,
     left: rect.x - props.dir === "ltr" ? 0 : 15,
     maxHeight: props.maxHeight + "px",
   });
@@ -82,7 +82,7 @@ function Selector(props) {
     setRect({ rect });
     setUlContainerStyle({
       ...ulContainerStyle,
-      top: rect.y + rect.height,
+      top: rect.y + rect.height + window.scrollY,
       left: rect.x - (props.dir === "ltr" ? 0 : 15),
     });
     setShowingItems(true);
@@ -147,13 +147,17 @@ function Selector(props) {
     setVisibleData(props.data);
   };
 
+  useEffect(() => {
+    setVisibleData(props.data);
+  }, [props.data]);
+
   return (
     <div
       style={divStyle}
       className={style.container}
       ref={container}
       value={value}
-      selectionChanged={selectionChanged}
+      // selectionChanged={selectionChanged}
     >
       <input
         type="text"

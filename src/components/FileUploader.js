@@ -40,11 +40,13 @@ export default function FileUploader(props) {
     axios.post(`${host}/file`, formData, options).then((res) => {
       setUploadState("Uploaded");
       setFile({
+        idattachment: res.data.file.IdAttachment,
         name: res.data.file.Name,
         size: res.data.file.Size,
         title: res.data.file.Title,
       });
       props.onChange({
+        IdAttachment: res.data.file.IdAttachment,
         Name: res.data.file.Name,
         Size: res.data.file.Size,
         Title: res.data.file.Title,
@@ -52,7 +54,7 @@ export default function FileUploader(props) {
     });
   };
 
-  const handleClick = (e) => {
+  const handleClick = () => {
     if (uploadState === "Empty") {
       fileInput.current.click();
     } else if (uploadState === "Uploaded") {

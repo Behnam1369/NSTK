@@ -1,3 +1,5 @@
+@import "../public.scss";
+
 .row {
   display: flex;
   align-items: center;
@@ -15,18 +17,19 @@
 }
 
 .add {
-  background-color: white;
-  border: solid 1px #5e0bd2;
-  color: #5e0bd2;
-  width: 530px;
-  padding: 10px;
+  background-color: $c1;
+  border: solid 1px $main-color;
+  color: $main-color;
+  width: 100%;
+  max-width: 530px;
+  padding: 3px;
   font-size: 18px;
   border-radius: 5px;
-  margin: 5px 0;
+  margin: 2px 0;
 }
 
 .add:hover {
-  background-color: #5e0bd2;
+  background-color: $main-color;
   color: white;
   cursor: pointer;
 }

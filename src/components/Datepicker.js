@@ -5,8 +5,23 @@ import { BsChevronLeft, BsChevronRight } from "react-icons/bs";
 import { HiOutlineSwitchHorizontal } from "react-icons/hi";
 import { IoCloseOutline } from "react-icons/io5";
 
+function useOutsideAlerter(ref, callback) {
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (ref.current && !ref.current.contains(event.target)) {
+        callback();
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [ref, callback]);
+}
+
 export default function Datepicker(props) {
   const valueToDate = (value) => {
+    if (!value) return null;
     let arr = value.split("-");
     return new Date(arr[0], arr[1] - 1, arr[2]);
   };
@@ -27,6 +42,11 @@ export default function Datepicker(props) {
   const calendarInput = useRef(null);
   const [calendarStyle, setCalendarStyle] = useState({});
 
+  const container = useRef(null);
+  useOutsideAlerter(container, () => {
+    setShowCalendar(false);
+  });
+
   useEffect(() => {
     let cf = calformat;
     if (localStorage[props.name]) {
@@ -42,10 +62,14 @@ export default function Datepicker(props) {
       setMonth(m);
     }
     setInputValue(formatDate(date));
-  }, [calformat]);
+  }, [calformat, props.value, date]);
 
   useEffect(() => {
-    props.onChange(date);
+    setDate(valueToDate(props.value));
+  }, [props.value]);
+
+  useEffect(() => {
+    props.onChange(gregorianFormatDate(date));
   }, [date]);
 
   const months = [
@@ -171,9 +195,23 @@ export default function Datepicker(props) {
     return [y, m, d];
   };
 
-  const formatDate = (date) => {
+  const gregorianFormatDate = (date) => {
     if (!date) return "";
-    if (calformat === "gregorian") {
+    var d = new Date(date),
+      month = "" + (d.getMonth() + 1),
+      day = "" + d.getDate(),
+      year = d.getFullYear();
+
+    if (month.length < 2) month = "0" + month;
+    if (day.length < 2) day = "0" + day;
+
+    return [year, month, day].join("-");
+  };
+
+  const formatDate = (date) => {
+    if (!date) {
+      return "";
+    } else if (calformat === "gregorian") {
       var d = new Date(date),
         month = "" + (d.getMonth() + 1),
         day = "" + d.getDate(),
@@ -286,10 +324,20 @@ export default function Datepicker(props) {
 
   useEffect(() => {
     setCalendarStyle({
-      top: rect.y + rect.height,
-      left: rect.x,
+      top: rect.y + rect.height + window.scrollY,
+      left: props.dir === "rtl" ? rect.x + rect.width - 220 : rect.x,
     });
-  }, [rect]);
+  }, [rect, window.width]);
+
+  useEffect(() => {
+    window.addEventListener("resize", () => {
+      setRect(calendarInput.current.getBoundingClientRect());
+    });
+
+    return () => {
+      window.removeEventListener("resize", () => {});
+    };
+  }, []);
 
   const handleCalendarIconClick = () => {
     setRect(calendarInput.current.getBoundingClientRect());
@@ -394,7 +442,6 @@ export default function Datepicker(props) {
   };
 
   const handleSwitch = () => {
-    console.log(localStorage);
     localStorage[props.name] =
       calformat === "gregorian" ? "jalali" : "gregorian";
 
@@ -434,7 +481,7 @@ export default function Datepicker(props) {
   };
 
   return (
-    <div className={`${style.datepicker} ${style[calformat]}`}>
+    <div className={`${style.datepicker} ${style[calformat]}`} ref={container}>
       <div className={style.wrapper}>
         <input
           type="text"
