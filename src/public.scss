@@ -5,10 +5,32 @@ $c2: #39498f;
 html,
 body {
   background-color: whitesmoke;
+
+  label {
+    font-family: IranSansLight;
+    font-weight: normal;
+    font-size: 12px;
+  }
+
+  .txt {
+    border: solid 1px rgb(129, 129, 193);
+    border-radius: 5px;
+    outline: none;
+    height: 22px;
+    padding: 0 5px;
+    font-family: IranSans;
+    font-size: 12px;
+    box-sizing: border-box;
+  }
+
+  .txt:focus {
+    box-shadow: 0 0 3px rgb(129, 129, 193);
+  }
 }
 
 @font-face {
   font-family: IranSans;
+  // border: solid 1px white;
   src: url("../public/fonts/IranSans.ttf");
 }
 
@@ -20,4 +42,57 @@ body {
 @font-face {
   font-family: Yekan;
   src: url("../public/fonts/Yekan.ttf");
+}
+
+.operationButtons {
+  background-color: $main-color;
+  color: #e6e6ef;
+  height: 40px;
+  position: fixed;
+  width: 100%;
+  top: 0;
+  max-width: 750px;
+  margin: auto;
+  left: calc((100% - 750px) / 2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  font-size: 18px;
+}
+
+@media screen and (max-width: 750px) {
+  .operationButtons {
+    left: 0;
+  }
+}
+
+.operationButton {
+  border: solid 1px #ffffffc5;
+  border-radius: 3px;
+  font-family: IranSansLight;
+  display: flex;
+  gap: 7px;
+  justify-content: space-around;
+  align-items: center;
+  padding: 3px 5px;
+  background-color: transparent;
+  color: White;
+  font-size: 18px;
+
+  span {
+    font-size: 10px;
+  }
+}
+
+.operationButton:disabled {
+  background-color: #ffffff;
+  color: #a0a0a0;
+  cursor: not-allowed;
+}
+
+.operationButton:enabled:hover {
+  background-color: #ffffff;
+  color: $c2;
+  cursor: pointer;
 }

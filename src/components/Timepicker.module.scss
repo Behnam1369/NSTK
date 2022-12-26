@@ -1,0 +1,31 @@
+@import "../public.scss";
+
+.timepicker {
+  border-radius: 4px;
+  padding: 2px;
+  background-color: White;
+  width: 55px;
+  display: flex;
+  justify-content: center;
+}
+
+.timepicker .hh,
+.timepicker .mm {
+  width: 25px;
+  outline: none;
+  border: none;
+  text-align: center;
+  height: 20px;
+}
+
+.timepicker.valid {
+  border: solid 1px springgreen;
+}
+
+.timepicker.invalid {
+  border: solid 1px red;
+}
+
+.colon {
+  display: flex;
+}
