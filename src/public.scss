@@ -20,6 +20,7 @@ body {
     padding: 0 5px;
     font-family: IranSans;
     font-size: 12px;
+    box-sizing: border-box;
   }
 
   .txt:focus {
@@ -55,7 +56,8 @@ body {
   left: calc((100% - 750px) / 2);
   display: flex;
   align-items: center;
-  justify-content: space-around;
+  justify-content: center;
+  gap: 7px;
   font-size: 18px;
 }
 
