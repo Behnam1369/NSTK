@@ -18,21 +18,24 @@ function useOutsideAlerter(ref, value, callback) {
 }
 
 function Selector(props) {
+  const { selectionChanged, value, data } = props;
   const [rect, setRect] = useState({ x: 0, y: 0, width: 0, height: 0 });
-  const [visibleData, setVisibleData] = useState(props.data);
+  const [visibleData, setVisibleData] = useState(data);
   const [showingItems, setShowingItems] = useState(false);
   const input1 = useRef(null);
   const ulContainer = useRef(null);
   const [suggestionIndex, setSuggestionIndex] = useState(0);
-  const [value, setValue] = useState(props.value);
-  const { selectionChanged } = props;
-  const [text, setText] = useState(() => {
+
+  const [text, setText] = useState("");
+
+  useEffect(() => {
     if (value === null) {
-      return "";
+      setText("");
     } else {
-      return visibleData.filter((el) => el[props.id] === value)[0][props.title];
+      setText(data.filter((el) => el[props.id] === value)[0][props.title]);
     }
-  });
+  }, [value]);
+
   const [maxRowWidth, setMaxRowWidth] = useState(props.maxRowWidth);
   const container = useRef(null);
   useOutsideAlerter(container, value, () => {
@@ -47,12 +50,12 @@ function Selector(props) {
     }
   });
 
-  useEffect(() => {
-    selectionChanged(value);
-    if (maxRowWidth < props.width) {
-      setMaxRowWidth(props.width);
-    }
-  }, [value]);
+  // useEffect(() => {
+  //   selectionChanged(value);
+  //   if (maxRowWidth < props.width) {
+  //     setMaxRowWidth(props.width);
+  //   }
+  // }, [value]);
 
   const divStyle = {
     width: props.width + "px",
@@ -91,7 +94,7 @@ function Selector(props) {
   const handleChange = (e) => {
     setText(e.target.value);
     if (e.target.value === "") {
-      setValue(null);
+      selectionChanged(null);
     }
     setVisibleData(
       props.data.filter((item) =>
@@ -141,7 +144,7 @@ function Selector(props) {
   };
 
   const select = () => {
-    setValue(visibleData[suggestionIndex][props.id]);
+    selectionChanged(visibleData[suggestionIndex][props.id]);
     setText(visibleData[suggestionIndex][props.title]);
     setShowingItems(false);
     setVisibleData(props.data);
