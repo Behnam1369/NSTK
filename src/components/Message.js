@@ -16,7 +16,7 @@ export default function Message(props) {
           />
         </div>
         <p>{props.text}</p>
-        <buttton onClick={(e) => handleClose(e)}>تایید</buttton>
+        <button onClick={(e) => handleClose(e)}>تایید</button>
       </div>
     </div>
   );
