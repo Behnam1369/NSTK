@@ -1,0 +1,21 @@
+@import "../../public.scss";
+.rateContainer {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+label {
+  font-weight: bold;
+}
+
+.cancelled {
+  grid-column: 1/3;
+  text-align: center;
+  color: rgb(143, 4, 4);
+  font-weight: bold;
+  font-family: IranSans;
+  margin: 0;
+  background-color: rgb(244, 224, 224);
+}
