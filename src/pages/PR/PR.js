@@ -125,7 +125,7 @@ export default function PR() {
           setCurArr(res.data.data.curArr);
           setData(res.data.data.vch);
           console.log(res.data.data.vch.Rate);
-          // handleRateChange(res.data.data.vch.Rate);
+          window.parent.postMessage("loaded", "*");
         });
       } else {
         await axios.get(`${host}/users/${iduser}/pr/new`).then((res) => {
@@ -135,6 +135,7 @@ export default function PR() {
             IdDept: res.data.data.idDept,
             Dept: res.data.data.dept,
           });
+          window.parent.postMessage("loaded", "*");
         });
       }
     };
