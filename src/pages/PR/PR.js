@@ -3,7 +3,7 @@ import Datepicker from "../../components/Datepicker";
 import FormContainer from "../../components/FormContainer";
 import AmountInput from "../../components/AmountInput";
 import { host } from "../../Utils/host";
-import { useParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import axios from "axios";
 import Selector from "../../components/Selector";
 import style from "./PR.module.scss";
@@ -57,7 +57,8 @@ const contractPaymentTypes = [
 
 export default function PR() {
   const { iduser, idpr } = useParams();
-
+  const [searchParams, setSearchParams] = useSearchParams();
+  const tabno = searchParams.get("tabno");
   const defaultState = {
     IdPr: null,
     No: null,
@@ -125,7 +126,7 @@ export default function PR() {
           setCurArr(res.data.data.curArr);
           setData(res.data.data.vch);
           console.log(res.data.data.vch.Rate);
-          window.parent.postMessage("loaded", "*");
+          window.parent.postMessage({ title: "loaded", tabno }, "*");
         });
       } else {
         await axios.get(`${host}/users/${iduser}/pr/new`).then((res) => {
@@ -135,7 +136,7 @@ export default function PR() {
             IdDept: res.data.data.idDept,
             Dept: res.data.data.dept,
           });
-          window.parent.postMessage("loaded", "*");
+          window.parent.postMessage({ title: "loaded", tabno }, "*");
         });
       }
     };
@@ -358,7 +359,24 @@ export default function PR() {
         setMessageText("خطا در انجام درخواست");
       });
   };
-  const handlePrint = (e) => {};
+  const handlePrint = (e) => {
+    e.preventDefault();
+    console.log("print");
+    if (idpr) {
+      window.parent.postMessage(
+        {
+          title: "print",
+          endpoint: "PrintPr",
+          args: { idpr, prno: data.PrNo },
+          tabTitle: `چاپ درخواست پرداخت ${data.PrNo}`,
+          tabno,
+        },
+        "*"
+      );
+    } else {
+      setMessageText("ابتدا سند را ذخیره کنید");
+    }
+  };
 
   return (
     <div>
