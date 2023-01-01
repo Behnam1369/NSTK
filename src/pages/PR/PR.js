@@ -8,9 +8,19 @@ import axios from "axios";
 import Selector from "../../components/Selector";
 import style from "./PR.module.scss";
 import { thousandSep, shamsiDate } from "../../Utils/public";
-import { IoSaveOutline, IoTrashOutline, IoPrintOutline } from "react-icons/io5";
+import {
+  IoSaveOutline,
+  IoTrashOutline,
+  IoPrintOutline,
+  IoAttachOutline,
+} from "react-icons/io5";
 import { IoIosCloseCircleOutline } from "react-icons/io";
 import Message from "../../components/Message";
+
+const headLetterTypes = [
+  { id: 1, title: "SPII" },
+  { id: 2, title: "نوید ستاره تجارت کیش" },
+];
 
 const paymentTypes = [
   { id: 1, title: "نقدی" },
@@ -203,6 +213,16 @@ export default function PR() {
     });
   };
 
+  const handleHeadLetterTypeUpdate = (e) => {
+    setData({
+      ...data,
+      IdHeadLetter: e.target.value,
+      HeadLetter: headLetterTypes.find(
+        (type) => type.id.toString() === e.target.value
+      ).title,
+    });
+  };
+
   const handlePrTypeUpdate = (e) => {
     setData({
       ...data,
@@ -312,6 +332,33 @@ export default function PR() {
     }
   }, [data.IdPrType]);
 
+  useEffect(() => {
+    if (
+      (data.IdHeadLetter == 2 && data.IdCur == 99) ||
+      (data.IdHeadLetter == 1 && data.IdCur == 1)
+    ) {
+      setData({
+        ...data,
+        Rate: 1,
+        RevertRate: 1,
+      });
+    }
+  }, [data.IdCur, data.IdHeadLetter]);
+
+  useEffect(() => {
+    if (data.Amount && data.Rate) {
+      setData({
+        ...data,
+        AmountIRR: parseFloat(data.Amount * data.Rate),
+      });
+    } else {
+      setData({
+        ...data,
+        AmountIRR: null,
+      });
+    }
+  }, [data.Rate, data.Amount]);
+
   const handleSave = async (e) => {
     e.preventDefault();
     setSaving(true);
@@ -361,7 +408,6 @@ export default function PR() {
   };
   const handlePrint = (e) => {
     e.preventDefault();
-    console.log("print");
     if (idpr) {
       window.parent.postMessage(
         {
@@ -378,9 +424,33 @@ export default function PR() {
     }
   };
 
+  const handleAttachment = (e) => {
+    e.preventDefault();
+    if (idpr) {
+      window.parent.postMessage(
+        {
+          title: "attachment",
+          args: { idform: 145, idvch: data.IdPr },
+          tabTitle: `پیوست های درخواست پرداخت ${data.PrNo}`,
+          tabno,
+        },
+        "*"
+      );
+    } else {
+      setMessageText("ابتدا سند را ذخیره کنید");
+    }
+  };
+
   return (
     <div>
       <div className={`${style.operationButtons}`} dir="rtl">
+        <button
+          className={`${style.operationButton}`}
+          onClick={(e) => handleAttachment(e)}
+        >
+          <IoAttachOutline />
+          <span>پیوست</span>
+        </button>
         <button
           className={`${style.operationButton}`}
           disabled={saving}
@@ -429,6 +499,25 @@ export default function PR() {
           dir="rtl"
           name="pr_prdate"
         />
+        <label>چاپ در سربرگ</label>
+        <div>
+          {headLetterTypes.map((type) => {
+            return (
+              <div key={type.id}>
+                <label>
+                  <input
+                    type="radio"
+                    name="headLetterType"
+                    value={type.id}
+                    onChange={(e) => handleHeadLetterTypeUpdate(e)}
+                    checked={data.IdHeadLetter == type.id}
+                  />
+                  {type.title}
+                </label>
+              </div>
+            );
+          })}
+        </div>
         <label>مبلغ</label>
         <AmountInput
           width="135px"
@@ -446,7 +535,8 @@ export default function PR() {
           value={data.IdCur}
           fontFamily={"IranSansLight"}
         />
-        {data.IdCur && data.IdCur !== 99 && (
+        {((data.IdCur && data.IdHeadLetter == 2 && data.IdCur !== 99) ||
+          (data.IdCur && data.IdHeadLetter == 1 && data.IdCur !== 1)) && (
           <>
             <label>نرخ ارز</label>
             <div className={style.rateContainer}>
