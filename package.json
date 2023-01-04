@@ -22,7 +22,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "react-scripts build",
+    "build": "set BUILD_PATH=//172.16.166.32/Users/b.aghaali/Desktop/nstk/build&& react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
