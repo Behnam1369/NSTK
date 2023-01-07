@@ -67,7 +67,7 @@ const contractPaymentTypes = [
 
 export default function PR() {
   const { iduser, idpr } = useParams();
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
   const tabno = searchParams.get("tabno");
   const defaultState = {
     IdPr: null,
