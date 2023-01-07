@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { useParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import style from "./Mission.module.scss";
 import { host } from "../../Utils/host";
 import Datepicker from "../../../src/components/Datepicker";
@@ -39,6 +39,8 @@ export default function Mission(props) {
     OtherFiles: [],
   };
   const [data, setData] = useState(defaultData);
+  const [searchParams] = useSearchParams();
+  const tabno = searchParams.get("tabno");
 
   useEffect(() => {
     const loadData = async () => {
@@ -70,6 +72,7 @@ export default function Mission(props) {
         });
     };
     loadData();
+    window.parent.postMessage({ title: "loaded", tabno }, "*");
   }, [iduser]);
 
   const updateSelectedUsers = (arr, loaded_users) => {
@@ -130,7 +133,17 @@ export default function Mission(props) {
     });
   };
 
-  console.log(data.ShastanPermit);
+  const handleFinance = (e, iduser, idmission, fullname) => {
+    e.preventDefault();
+    window.parent.postMessage(
+      {
+        title: "work_mission_payments",
+        args: { iduser, idmission },
+        tabTitle: `اطلاعات مالی ماموریت ${fullname}`,
+      },
+      "*"
+    );
+  };
 
   return (
     <div>
@@ -217,13 +230,37 @@ export default function Mission(props) {
             .filter((user) => user.selected)
             .map((user) => {
               return (
-                <div key={user.Username} className={style.missioner}>
-                  {user.Fname} {user.Lname}
-                  <BsTrash
-                    className={style.remove}
-                    title="Delete"
-                    onClick={() => handleUserSelect(user.IdUser)}
-                  />
+                <div>
+                  <div
+                    key={user.Username}
+                    className={style.missioner}
+                    style={{ display: "inline-flex" }}
+                  >
+                    {user.Fname} {user.Lname}
+                    <BsTrash
+                      className={style.remove}
+                      title="Delete"
+                      onClick={() => handleUserSelect(user.IdUser)}
+                    />
+                  </div>
+                  <button
+                    className={style.formButton}
+                    style={{
+                      display: "inline",
+                      fontSize: "10px",
+                      marginRight: "10px",
+                    }}
+                    onClick={(e) =>
+                      handleFinance(
+                        e,
+                        user.IdUser,
+                        data.IdWorkMission,
+                        user.Fname + " " + user.Lname
+                      )
+                    }
+                  >
+                    اطلاعات مالی
+                  </button>
                 </div>
               );
             })}
