@@ -5,94 +5,45 @@ import { BsTrash } from "react-icons/bs";
 import style from "./MultiFileUploader.module.scss";
 
 export default function MultiFileUploader(props) {
-  const [files, setFiles] = useState(props.files);
+
+  const [idfiles, setIdfiles] = useState(props.idfiles.split(","));
   const btn = useRef(null);
 
   useEffect(() => {
-    if (props.files.length === 0) {
-      let newFiles = [
-        {
-          id: uuidv4(),
-          IdAttachment: null,
-          Title: null,
-          Name: null,
-          Size: null,
-          UploadDate: null,
-        },
-      ];
-      setFiles(newFiles);
-    } else {
-      setFiles(
-        props.files.map((file) => ({
-          ...file,
-          id: uuidv4(),
-        }))
-      );
-    }
-  }, [props.files]);
+    if (props.idfiles == "") 
+      setIdfiles([uuidv4()]);
+  }, [props.idfiles]);
 
-  const handleFileUpdate = (f, id = null) => {
-    let newFiles;
-    if (f == null) {
-      newFiles = files.map((file) =>
-        file.id === id
-          ? {
-              id: uuidv4(),
-              IdAttachment: null,
-              Title: null,
-              Name: null,
-              Size: null,
-              UploadDate: null,
-            }
-          : file
-      );
-    } else {
-      newFiles = files.map((file) =>
-        file.id === id ? { ...file, ...f } : file
-      );
-    }
-    setFiles(newFiles);
-    props.onChange(newFiles);
+  const handleFileUpdate = (oldid, newid) => {
+    setIdfiles(idfiles.map((idfile) => (idfile === oldid ? newid : idfile)));
+    props.onChange(idfiles.join(","));
   };
 
   const handleAddFile = (e) => {
     e.preventDefault();
-    let newFiles = [
-      ...files,
-      {
-        id: uuidv4(),
-        IdAttachment: null,
-        Title: null,
-        Name: null,
-        Size: null,
-        UploadDate: null,
-      },
-    ];
-    setFiles(newFiles);
-    props.onChange(newFiles);
+    setIdfiles([...idfiles, uuidv4()]);
+    props.onChange([...idfiles, uuidv4()].join(","));
   };
 
   const handleDelete = (id) => {
-    let newFiles = files.filter((file) => file.id !== id);
-    setFiles(newFiles);
-    props.onChange(newFiles);
+    var newIdFiles = idfiles.filter((idfile) => idfile != id);
+    setIdfiles(newIdFiles);
+    props.onChange(newIdFiles.join(","));
   };
 
   return (
     <div dir="ltr" style={{ maxWidth: "530px", width: "100%" }}>
-      {files.length > 0 &&
-        files.map((file) => (
-          <div className={style.row} key={file.id}>
+      {idfiles.length > 0 &&
+        idfiles.map((idfile) => (
+          <div className={style.row} key={idfile}>
             <FileUploader
-              file={file}
-              key={file.id}
-              onChange={(f) => handleFileUpdate(f, file.id)}
+              idfile={idfile}
+              onChange={(newid) => handleFileUpdate(idfile, newid)}
             />
             <BsTrash
               className={style.remove}
               title="Delete"
-              key={"btnDelete" + file.id}
-              onClick={() => handleDelete(file.id)}
+              onClick={() => handleDelete(idfile)}
             />
           </div>
         ))}
