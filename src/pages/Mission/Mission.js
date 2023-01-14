@@ -10,33 +10,62 @@ import Selector from "../../components/Selector";
 import { BsTrash } from "react-icons/bs";
 import { IoSaveOutline } from "react-icons/io5";
 import Message from "../../components/Message";
+import AmountInput from "../../components/AmountInput";
+
+const missionTypes = [
+  { id: 1, title: "ماموریت داخلی" },
+  { id: 2, title: "ماموریت خارجی" },
+];
+
+const requirements = [
+  { id: 1, title: "دعوت نامه" },
+  { id: 2, title: "ویزا" },
+  { id: 3, title: "بلیط" },
+]
+
+
 
 export default function Mission(props) {
   const [messageText, setMessageText] = useState(false);
   const [saving, setSaving] = useState(false);
   const { iduser, idmission } = useParams();
   const [users, setUsers] = useState([]);
+  const [curs, setCurs] = useState([]);
   const [objectives, setObjectives] = useState([]);
+
   const defaultData = {
-    IdWorkMission: "",
+    IdWorkMission: null,
     Subject: "",
     IdUser: iduser,
     IdWorkMissionObjective: null,
     OtherWorkMissionObjective: "",
+    IdMissionType: null,
+    MissionType: "",
     EstimatedStartDate: "",
     EstimatedStartTime: "",
     EstimatedEndDate: "",
     EstimatedEndTime: null,
     Origin: "",
     Destination: "",
+    IdRequirement: "",
+    Requirements: "",
+    Vehicle: "",
+    ResidencePlace: "",
+    IdPettyCashHolder: null,
+    PettyCashAmount: "",
+    IdCur: null,
+    Abr: "",
+    OtherRequirements: "",
     Note: "",
-    CommissionPermit: [],
-    ShastanPermit: [],
-    MissionOrder: [],
-    Ticket: [],
-    Hotel: [],
-    Payments: [],
-    OtherFiles: [],
+    CommissionPermit: "",
+    ShastanPermit: "",
+    LeavePermit:"",
+    MissionOrder: "",
+    Visa:"",
+    Ticket: "",
+    Hotel: "",
+    Payments: "",
+    OtherFiles: "",
   };
   const [data, setData] = useState(defaultData);
   const [searchParams] = useSearchParams();
@@ -50,6 +79,7 @@ export default function Mission(props) {
           let loaded_users = res.data.data.users;
           setUsers(loaded_users);
           setObjectives(res.data.data.work_mission_objectives);
+          setCurs(res.data.data.currencies);
           if (idmission) {
             axios
               .get(`${host}/users/${iduser}/work_missions/${idmission}`)
@@ -129,6 +159,7 @@ export default function Mission(props) {
 
     await axios.post(`${host}/work_missions`, doc).then((res) => {
       setSaving(false);
+      console.log(res);
       setMessageText("اطلاعات با موفقیت ثبت شد");
     });
   };
@@ -144,6 +175,70 @@ export default function Mission(props) {
       "*"
     );
   };
+
+  const handleMissionReport = (e, iduser, idmission, fullname) => {
+    e.preventDefault();
+    window.parent.postMessage(
+      {
+        title: "work_mission_report",
+        args: { iduser, idmission },
+        tabTitle: `گزارش ماموریت ${fullname}`,
+      },
+      "*"
+    );
+  };
+
+  const handleMissionTypeUpdate = (e) => {
+    setData({
+      ...data,
+      IdMissionType: e.target.value,
+      MissionType: missionTypes.find((type) => type.id == e.target.value).title,
+    });
+  };
+
+  const handleRequirementUpdate = (e) => {
+    if (data.IdRequirement.split(',').includes(e.target.value.toString())) {
+      setData({
+        ...data,
+        IdRequirement: data.IdRequirement.split(',').filter((item) => item != e.target.value).join(','),
+        Requirements: data.Requirements.split(',').filter((item) => item != requirements.find((type) => type.id == e.target.value).title).join(','),
+      });
+      return;
+    } else {
+      if (data.IdRequirement == "") {
+        setData({
+          ...data,
+          IdRequirement: e.target.value,
+          Requirements: requirements.find((type) => type.id == e.target.value).title,
+        });
+      } else {
+        let id = data.IdRequirement.split(',');
+        id.push(e.target.value);
+        let title = data.Requirements.split(',');
+        title.push(requirements.find((type) => type.id == e.target.value).title);
+        setData({
+          ...data,
+          IdRequirement: id.join(','),
+          Requirements: title.join(','),
+        });
+      }
+    }
+  }
+
+  const handleAmountChange = (val) => {
+    setData({ ...data, PettyCashAmount: val });
+  };
+
+  const handleCurSelect = (idcur) => {
+    setData({ ...data, IdCur: idcur, Abr: curs.find((cur) => cur.IdCur == idcur).Abr });
+  }
+
+  const handlePEttyCashHolderSelect = (iduser) => {
+    var user = users.find((user) => user.IdUser == iduser);
+    var fullname = user.Fname + " " + user.Lname;
+    setData({ ...data, IdPettyCashHolder: iduser, PettyCashHolder: fullname });
+  }
+
 
   return (
     <div>
@@ -170,6 +265,62 @@ export default function Mission(props) {
           value={data.Subject}
           onChange={(e) => handleUpdate(e)}
           autoComplete="off"
+        />
+        <label>نوع ماموریت</label>
+        <div>
+          {missionTypes.map((type) => {
+            return (
+              <div key={type.id}>
+                <label>
+                  <input
+                    type="radio"
+                    value={type.id}
+                    onChange={(e) => handleMissionTypeUpdate(e)}
+                    checked={data.IdMissionType == type.id}
+                  />
+                  {type.title}
+                </label>
+              </div>
+            );
+          })}
+        </div>
+        <label>امکانات مورد نیاز</label>
+        <div>
+          {requirements.map((requirement) => {
+            return (
+              <div key={requirement.id}>
+                <label>
+                  <input
+                    type="checkbox"
+                    value={requirement.id}
+                    onChange={(e) => handleRequirementUpdate(e)}
+                    checked={data.IdRequirement.split(',').includes(requirement.id.toString())}
+                  />
+                  {requirement.title}
+                </label>
+              </div>
+            );
+          })}
+        </div>
+        <label>مقصد</label>
+        <input
+          type="text"
+          className={style.txt}
+          name="Vehicle"
+          value={data.Vehicle}
+          onChange={(e) => handleUpdate(e)}
+          autoComplete="off"
+          style={{ width: "250px" }}
+        />
+        <label>محل اقامت</label>
+        <input
+          type="text"
+          className={style.txt}
+          name="ResidencePlace"
+          value={data.ResidencePlace}
+          onChange={(e) => handleUpdate(e)}
+          autoComplete="off"
+          style={{ width: "250px" }}
         />
         <label>هدف از ماموریت</label>
         <div>
@@ -261,10 +412,62 @@ export default function Mission(props) {
                   >
                     اطلاعات مالی
                   </button>
+                  {iduser == user.IdUser && (
+                    <button
+                      className={style.formButton}
+                      style={{
+                        display: "inline",
+                        fontSize: "10px",
+                        marginRight: "10px",
+                      }}
+                      onClick={(e) =>
+                        handleMissionReport(
+                          e,
+                          user.IdUser,
+                          data.IdWorkMission,
+                          user.Fname + " " + user.Lname
+                        )
+                      }
+                    >
+                      گزارش ماموریت
+                    </button>
+                  )}
                 </div>
               );
             })}
         </div>
+        <label>تنخواه دار</label>
+        <Selector
+          data={users
+            .filter((user) => user.Lname && user.selected)
+            .map((user) => {
+              return { ...user, FullName: user.Fname + " " + user.Lname };
+            })}
+          id="IdUser"
+          title="FullName"
+          width={250}
+          selectionChanged={(iduser) => handlePEttyCashHolderSelect(iduser)}
+          value={data.IdPettyCashHolder}
+          dir="rtl"
+          fontFamily={"IranSansLight"}
+        />
+        <label>مبلغ تنخواه مورد نیاز</label>
+        <AmountInput
+          width="135px"
+          value={data.PettyCashAmount}
+          onChange={(val) => handleAmountChange(val)}
+        />
+        <label>ارز</label>
+        <Selector
+          data={curs}
+          id="IdCur"
+          title="Abr"
+          width={100}
+          selectionChanged={(idcur) => handleCurSelect(idcur)}
+          value={data.IdCur}
+          dir="rtl"
+          fontFamily={"Arial"}
+        />
         <label>تاریخ عزیمت</label>
         <Datepicker
           value={data.EstimatedStartDate}
@@ -324,43 +527,48 @@ export default function Mission(props) {
             boxSizing: "border-box",
           }}
         ></textarea>
-        <label>مجوز کمیسیون</label>
+        <label>مجوز کمیته تخصصی / مجوز مدیریت</label>
         <MultiFileUploader
-          files={data.CommissionPermit}
-          onChange={(files) => setFile("CommissionPermit", files)}
+          idfiles={data.CommissionPermit}
+          onChange={(idfiles) => setFile("CommissionPermit", idfiles)}
         />
         <h1>منابع انسانی</h1>
         <label>مجوز شستان</label>
         <MultiFileUploader
-          files={data.ShastanPermit}
-          onChange={(f) => setFile("ShastanPermit", f)}
+          idfiles={data.ShastanPermit}
+          onChange={(idfiles) => setFile("ShastanPermit", idfiles)}
+        />
+        <label>مجوز خروج</label>
+        <MultiFileUploader
+          idfiles={data.LeavePermit}
+          onChange={(idfiles) => setFile("LeavePermit", idfiles)}
         />
         <label>حکم ماموریت</label>
         <MultiFileUploader
-          files={data.MissionOrder}
-          onChange={(f) => setFile("MissionOrder", f)}
+          idfiles={data.MissionOrder}
+          onChange={(idfiles) => setFile("MissionOrder", idfiles)}
         />
         <label>بلیط</label>
         <MultiFileUploader
-          files={data.Ticket}
-          onChange={(f) => setFile("ticket", f)}
+          idfiles={data.Ticket}
+          onChange={(idfiles) => setFile("ticket", idfiles)}
         />
         <label>هتل</label>
         <MultiFileUploader
-          files={data.Hotel}
-          onChange={(f) => setFile("hotel", f)}
+          idfiles={data.Hotel}
+          onChange={(idfiles) => setFile("hotel", idfiles)}
         />
         <label>اسناد پرداخت به مامور</label>
         <MultiFileUploader
-          files={data.Payments}
-          onChange={(f) => setFile("Payments", f)}
+          idfiles={data.Payments}
+          onChange={(idfiles) => setFile("Payments", idfiles)}
         />
         <label>سایر مدارک</label>
         <MultiFileUploader
-          files={data.OtherFiles}
-          onChange={(f) => setFile("OtherFiles", f)}
+          idfiles={data.OtherFiles}
+          onChange={(idfiles) => setFile("OtherFiles", idfiles)}
         />
-      </div>
+      </div> 
       {messageText && (
         <Message
           text={messageText}
