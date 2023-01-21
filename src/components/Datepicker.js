@@ -68,10 +68,6 @@ export default function Datepicker(props) {
     setDate(valueToDate(props.value));
   }, [props.value]);
 
-  useEffect(() => {
-    props.onChange(gregorianFormatDate(date));
-  }, [date]);
-
   const months = [
     { name: "January", days: 31 },
     { name: "February", days: 28 },
@@ -373,6 +369,7 @@ export default function Datepicker(props) {
   const handleToday = () => {
     let d = new Date();
     setDate(d);
+    props.onChange(gregorianFormatDate(d));
     if (calformat === "gregorian") {
       setYear(d.getFullYear());
       setMonth(d.getMonth());
@@ -388,6 +385,7 @@ export default function Datepicker(props) {
 
   const handleDateClick = (date) => {
     setDate(date);
+    props.onChange(gregorianFormatDate(date));
     if (calformat === "gregorian") {
       setYear(date.getFullYear());
       setMonth(date.getMonth());
@@ -405,6 +403,7 @@ export default function Datepicker(props) {
     let text = e.target.value.replace(/\D/g, "");
     if (text.length === 0) {
       setDate(null);
+      props.onChange(null);
     } else if (text.length === 8) {
       let y = parseInt(text.substring(0, 4));
       let m = parseInt(text.substring(4, 6));
@@ -414,6 +413,7 @@ export default function Datepicker(props) {
         if (!isNaN(timestamp)) {
           let dt = new Date(timestamp);
           setDate(dt);
+          props.onChange(gregorianFormatDate(dt));
           setInputValue(formatDate(dt));
           setYear(dt.getFullYear());
           setMonth(dt.getMonth());
@@ -429,6 +429,7 @@ export default function Datepicker(props) {
             ) + parseInt(diff);
           let dt = getDateFromIndex(dateIndex);
           setDate(dt);
+          props.onChange(gregorianFormatDate(dt));
           setInputValue(formatDate(dt));
           setYear(parseInt(y));
           setMonth(parseInt(m) - 1);
@@ -454,6 +455,7 @@ export default function Datepicker(props) {
       var tomorrow = date;
       tomorrow.setDate(tomorrow.getDate() + 1);
       setDate(tomorrow);
+      props.onChange(gregorianFormatDate(tomorrow));
       if (calformat === "gregorian") {
         setYear(date.getFullYear());
         setMonth(date.getMonth());
@@ -468,6 +470,7 @@ export default function Datepicker(props) {
       var yesterday = date;
       yesterday.setDate(yesterday.getDate() - 1);
       setDate(yesterday);
+      props.onChange(gregorianFormatDate(yesterday));
       if (calformat === "gregorian") {
         setYear(date.getFullYear());
         setMonth(date.getMonth());
