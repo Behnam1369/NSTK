@@ -24,8 +24,9 @@ export default function FileUploader(props) {
       });
     };
 
-    if (!isNaN(idfile))
+    if (idfile && !isNaN(idfile)) {
       loadData();
+    }
   }, [idfile])
 
   const uploadFile = (e) => {
