@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { useParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import style from "./Mission.module.scss";
 import { host } from "../../Utils/host";
 import Datepicker from "../../../src/components/Datepicker";
@@ -8,68 +8,90 @@ import Timepicker from "../../components/Timepicker";
 import MultiFileUploader from "../../components/MultiFileUploader";
 import Selector from "../../components/Selector";
 import { BsTrash } from "react-icons/bs";
-import { IoSaveOutline } from "react-icons/io5";
+import { IoAttachOutline, IoPrintOutline, IoSaveOutline } from "react-icons/io5";
 import Message from "../../components/Message";
+import AmountInput from "../../components/AmountInput";
+import { shamsiDate } from "../../Utils/public";
+
+const missionTypes = [
+  { id: 1, title: "ماموریت داخلی" },
+  { id: 2, title: "ماموریت خارجی" },
+];
+
+const requirements = [
+  { id: 1, title: "دعوت نامه" },
+  { id: 2, title: "ویزا" },
+  { id: 3, title: "بلیط" },
+]
 
 export default function Mission(props) {
   const [messageText, setMessageText] = useState(false);
   const [saving, setSaving] = useState(false);
   const { iduser, idmission } = useParams();
   const [users, setUsers] = useState([]);
+  const [curs, setCurs] = useState([]);
   const [objectives, setObjectives] = useState([]);
+
   const defaultData = {
-    IdWorkMission: "",
+    IdWorkMission: null,
     Subject: "",
     IdUser: iduser,
+    WorkMissioners: "",
     IdWorkMissionObjective: null,
+    WorkMissionObjective: null,
     OtherWorkMissionObjective: "",
+    IdMissionType: null,
+    MissionType: "",
     EstimatedStartDate: "",
+    EstimatedStartDateShamsi: "",
     EstimatedStartTime: "",
     EstimatedEndDate: "",
+    EstimatedEndDateShamsi: "",
     EstimatedEndTime: null,
     Origin: "",
     Destination: "",
+    IdRequirement: "",
+    Requirements: "",
+    Vehicle: "",
+    ResidencePlace: "",
+    IdPettyCashHolder: null,
+    PettyCashAmount: "",
+    IdCur: null,
+    Abr: "",
+    OtherRequirements: "",
     Note: "",
-    CommissionPermit: [],
-    ShastanPermit: [],
-    MissionOrder: [],
-    Ticket: [],
-    Hotel: [],
-    Payments: [],
-    OtherFiles: [],
+    CommissionPermit: "",
+    ShastanPermit: "",
+    LeavePermit:"",
+    MissionOrder: "",
+    Visa:"",
+    Ticket: "",
+    Hotel: "",
+    Payments: "",
+    OtherFiles: "",
   };
   const [data, setData] = useState(defaultData);
+  const [searchParams] = useSearchParams();
+  const tabno = searchParams.get("tabno");
 
   useEffect(() => {
     const loadData = async () => {
       await axios
-        .get(`${host}/users/${iduser}/work_missions/new`)
+        .get(`${host}/users/${iduser}/work_missions/${idmission || 'new'}`)
         .then((res) => {
           let loaded_users = res.data.data.users;
           setUsers(loaded_users);
           setObjectives(res.data.data.work_mission_objectives);
+          setCurs(res.data.data.currencies);
+          
           if (idmission) {
-            axios
-              .get(`${host}/users/${iduser}/work_missions/${idmission}`)
-              .then((res) => {
-                let loadedDate = res.data.data;
-                loadedDate.CommissionPermit = loadedDate.commission_permit;
-                loadedDate.ShastanPermit = loadedDate.shastan_permit;
-                loadedDate.MissionOrder = loadedDate.mission_order;
-                loadedDate.Ticket = loadedDate.ticket;
-                loadedDate.Hotel = loadedDate.hotel;
-                loadedDate.Payments = loadedDate.payments;
-                loadedDate.OtherFiles = loadedDate.other_files;
-                setData(loadedDate);
-                updateSelectedUsers(
-                  res.data.data.work_missioners,
-                  loaded_users
-                );
-              });
+            updateSelectedUsers(res.data.data.work_missioners, loaded_users)
+            setData(res.data.data.work_mission);
           }
         });
     };
     loadData();
+    window.parent.postMessage({ title: "loaded", tabno }, "*");
   }, [iduser]);
 
   const updateSelectedUsers = (arr, loaded_users) => {
@@ -83,6 +105,12 @@ export default function Mission(props) {
         }
       })
     );
+
+    setData({...data, 
+      WorkMissioners: arr.filter(user => user.selected).map(
+        user => user.Fname + " " + user.Lname
+      ).join("، ")
+    })
   };
 
   const handleUpdate = (e) => {
@@ -90,11 +118,11 @@ export default function Mission(props) {
   };
 
   const setTime = (name, val) => {
-    setData({ ...data, [name]: val });
+    setData({ ...data, [name]: val  });
   };
 
   const setDate = (name, val) => {
-    // setData({ ...data, [name]: val });
+    setData({ ...data, [name]: val, [name+"Shamsi"]: shamsiDate(val) });
   };
 
   const setFile = (name, val) => {
@@ -102,14 +130,20 @@ export default function Mission(props) {
   };
 
   const handleUserSelect = (iduser) => {
-    setUsers([
+    var newArr = [
       ...users.filter((user) => user.IdUser !== iduser),
       ...users
         .filter((user) => user.IdUser === iduser)
         .map((user) => {
           return { ...user, selected: !user.selected };
         }),
-    ]);
+    ]
+    setUsers(newArr);
+    setData({...data, 
+      WorkMissioners: newArr.filter(user => user.selected).map(
+        user => user.Fname + " " + user.Lname
+      ).join("، ")
+    })
   };
 
   const handleSave = async (e) => {
@@ -118,19 +152,112 @@ export default function Mission(props) {
     let doc = {
       ...data,
       iduser,
-      missioners: users
+      work_missioners: users
         .filter((user) => user.selected)
-        .map((user) => user.IdUser)
-        .join(","),
+        .map((user) => {return {IdUser: user.IdUser}} )
     };
 
     await axios.post(`${host}/work_missions`, doc).then((res) => {
       setSaving(false);
+      setData(res.data.work_mission);
       setMessageText("اطلاعات با موفقیت ثبت شد");
     });
   };
 
-  console.log(data.ShastanPermit);
+  const handleFinance = (e, iduser, idmission, fullname) => {
+    e.preventDefault();
+    window.parent.postMessage(
+      {
+        title: "work_mission_payments",
+        args: { iduser, idmission },
+        tabTitle: `اطلاعات مالی ماموریت ${fullname}`,
+      },
+      "*"
+    );
+  };
+
+  const handleMissionReport = (e, iduser, idmission, fullname) => {
+    e.preventDefault();
+    window.parent.postMessage(
+      {
+        title: "work_mission_report",
+        args: { iduser, idmission },
+        tabTitle: `گزارش ماموریت ${fullname}`,
+      },
+      "*"
+    );
+  };
+
+  const handleMissionTypeUpdate = (e) => {
+    setData({
+      ...data,
+      IdMissionType: e.target.value,
+      MissionType: missionTypes.find((type) => type.id == e.target.value).title,
+    });
+  };
+
+  const handleRequirementUpdate = (e) => {
+    if (data.IdRequirement.split(',').includes(e.target.value.toString())) {
+      setData({
+        ...data,
+        IdRequirement: data.IdRequirement.split(',').filter((item) => item != e.target.value).join(','),
+        Requirements: data.Requirements.split(',').filter((item) => item != requirements.find((type) => type.id == e.target.value).title).join(','),
+      });
+      return;
+    } else {
+      if (data.IdRequirement == "") {
+        setData({
+          ...data,
+          IdRequirement: e.target.value,
+          Requirements: requirements.find((type) => type.id == e.target.value).title,
+        });
+      } else {
+        let id = data.IdRequirement.split(',');
+        id.push(e.target.value);
+        let title = data.Requirements.split(',');
+        title.push(requirements.find((type) => type.id == e.target.value).title);
+        setData({
+          ...data,
+          IdRequirement: id.join(','),
+          Requirements: title.join(','),
+        });
+      }
+    }
+  }
+
+  const handleAmountChange = (val) => {
+    setData({ ...data, PettyCashAmount: val });
+  };
+
+  const handleCurSelect = (idcur) => {
+    setData({ ...data, IdCur: idcur, Abr: curs.find((cur) => cur.IdCur == idcur).Abr });
+  }
+
+  const handlePettyCashHolderSelect = (iduser) => {
+    var user = users.find((user) => user.IdUser == iduser);
+    var fullname = user.Fname + " " + user.Lname;
+    setData({ ...data, IdPettyCashHolder: iduser, PettyCashHolder: fullname });
+  }
+
+  const handlePrint = (e) => {
+    e.preventDefault();
+    if (data.IdWorkMission) {
+      window.parent.postMessage(
+        {
+          title: "print",
+          endpoint: "PrintWorkMission",
+          args: { idworkmission: data.IdWorkMission},
+          tabTitle: `چاپ درخواست ماموریت ${data.IdWorkMission}`,
+          tabno,
+        },
+        "*"
+      );
+    } else {
+      setMessageText("ابتدا سند را ذخیره کنید");
+    }
+  };
+
+
 
   return (
     <div>
@@ -142,6 +269,13 @@ export default function Mission(props) {
         >
           <IoSaveOutline />
           <span>{saving ? "درحال ذخیره" : "ذخیره"}</span>
+        </button>
+        <button
+          className={`${style.operationButton}`}
+          onClick={(e) => handlePrint(e)}
+        >
+          <IoPrintOutline />
+          <span>چاپ</span>
         </button>
       </div>
 
@@ -158,6 +292,62 @@ export default function Mission(props) {
           onChange={(e) => handleUpdate(e)}
           autoComplete="off"
         />
+        <label>نوع ماموریت</label>
+        <div>
+          {missionTypes.map((type) => {
+            return (
+              <div key={type.id}>
+                <label>
+                  <input
+                    type="radio"
+                    value={type.id}
+                    onChange={(e) => handleMissionTypeUpdate(e)}
+                    checked={data.IdMissionType == type.id}
+                  />
+                  {type.title}
+                </label>
+              </div>
+            );
+          })}
+        </div>
+        <label>امکانات مورد نیاز</label>
+        <div>
+          {requirements.map((requirement) => {
+            return (
+              <div key={requirement.id}>
+                <label>
+                  <input
+                    type="checkbox"
+                    value={requirement.id}
+                    onChange={(e) => handleRequirementUpdate(e)}
+                    checked={data.IdRequirement.split(',').includes(requirement.id.toString())}
+                  />
+                  {requirement.title}
+                </label>
+              </div>
+            );
+          })}
+        </div>
+        <label>وسیله ایاب و ذهاب</label>
+        <input
+          type="text"
+          className={style.txt}
+          name="Vehicle"
+          value={data.Vehicle}
+          onChange={(e) => handleUpdate(e)}
+          autoComplete="off"
+          style={{ width: "250px" }}
+        />
+        <label>محل اقامت</label>
+        <input
+          type="text"
+          className={style.txt}
+          name="ResidencePlace"
+          value={data.ResidencePlace}
+          onChange={(e) => handleUpdate(e)}
+          autoComplete="off"
+          style={{ width: "250px" }}
+        />
         <label>هدف از ماموریت</label>
         <div>
           {objectives.map((objective) => {
@@ -171,7 +361,9 @@ export default function Mission(props) {
                   name="IdWorkMissionObjective"
                   value={objective.IdWorkMissionObjective}
                   onChange={(e) => {
-                    handleUpdate(e);
+                    setData({...data, 
+                      IdWorkMissionObjective: e.target.value,
+                      WorkMissionObjective: objectives.find(objective => objective.IdWorkMissionObjective == e.target.value)["Title"] })
                   }}
                   checked={
                     objective.IdWorkMissionObjective ==
@@ -217,22 +409,99 @@ export default function Mission(props) {
             .filter((user) => user.selected)
             .map((user) => {
               return (
-                <div key={user.Username} className={style.missioner}>
-                  {user.Fname} {user.Lname}
-                  <BsTrash
-                    className={style.remove}
-                    title="Delete"
-                    onClick={() => handleUserSelect(user.IdUser)}
-                  />
+                <div key={user.IdUser}>
+                  <div
+                    key={user.Username}
+                    className={style.missioner}
+                    style={{ display: "inline-flex" }}
+                  >
+                    {user.Fname} {user.Lname}
+                    <BsTrash
+                      className={style.remove}
+                      title="Delete"
+                      onClick={() => handleUserSelect(user.IdUser)}
+                    />
+                  </div>
+                  <button
+                    className={style.formButton}
+                    style={{
+                      display: "inline",
+                      fontSize: "10px",
+                      marginRight: "10px",
+                    }}
+                    onClick={(e) =>
+                      handleFinance(
+                        e,
+                        user.IdUser,
+                        data.IdWorkMission,
+                        user.Fname + " " + user.Lname
+                      )
+                    }
+                  >
+                    اطلاعات مالی
+                  </button>
+                  {iduser == user.IdUser && (
+                    <button
+                      className={style.formButton}
+                      style={{
+                        display: "inline",
+                        fontSize: "10px",
+                        marginRight: "10px",
+                      }}
+                      onClick={(e) =>
+                        handleMissionReport(
+                          e,
+                          user.IdUser,
+                          data.IdWorkMission,
+                          user.Fname + " " + user.Lname
+                        )
+                      }
+                    >
+                      گزارش ماموریت
+                    </button>
+                  )}
                 </div>
               );
             })}
         </div>
+        <label>تنخواه دار</label>
+        <Selector
+          data={users
+            .filter((user) => user.Lname && user.selected)
+            .map((user) => {
+              return { ...user, FullName: user.Fname + " " + user.Lname };
+            })}
+          id="IdUser"
+          title="FullName"
+          width={250}
+          selectionChanged={(iduser) => handlePettyCashHolderSelect(iduser)}
+          value={data.IdPettyCashHolder}
+          dir="rtl"
+          fontFamily={"IranSansLight"}
+        />
+        <label>مبلغ تنخواه مورد نیاز</label>
+        <AmountInput
+          width="135px"
+          value={data.PettyCashAmount}
+          onChange={(val) => handleAmountChange(val)}
+        />
+        <label>ارز</label>
+        <Selector
+          data={curs}
+          id="IdCur"
+          title="Abr"
+          width={100}
+          selectionChanged={(idcur) => handleCurSelect(idcur)}
+          value={data.IdCur}
+          dir="rtl"
+          fontFamily={"Arial"}
+        />
         <label>تاریخ عزیمت</label>
         <Datepicker
           value={data.EstimatedStartDate}
           onChange={(val) => setDate("EstimatedStartDate", val)}
           dir="rtl"
+          calforma="jalali"
           name="mission_estimated_start_date"
         />
         <label>ساعت عزیمت</label>
@@ -287,43 +556,48 @@ export default function Mission(props) {
             boxSizing: "border-box",
           }}
         ></textarea>
-        <label>مجوز کمیسیون</label>
+        <label>مجوز کمیته تخصصی / مجوز مدیریت</label>
         <MultiFileUploader
-          files={data.CommissionPermit}
-          onChange={(files) => setFile("CommissionPermit", files)}
+          idfiles={data.CommissionPermit}
+          onChange={(idfiles) => setFile("CommissionPermit", idfiles)}
         />
         <h1>منابع انسانی</h1>
         <label>مجوز شستان</label>
         <MultiFileUploader
-          files={data.ShastanPermit}
-          onChange={(f) => setFile("ShastanPermit", f)}
+          idfiles={data.ShastanPermit}
+          onChange={(idfiles) => setFile("ShastanPermit", idfiles)}
+        />
+        <label>مجوز خروج</label>
+        <MultiFileUploader
+          idfiles={data.LeavePermit}
+          onChange={(idfiles) => setFile("LeavePermit", idfiles)}
         />
         <label>حکم ماموریت</label>
         <MultiFileUploader
-          files={data.MissionOrder}
-          onChange={(f) => setFile("MissionOrder", f)}
+          idfiles={data.MissionOrder}
+          onChange={(idfiles) => setFile("MissionOrder", idfiles)}
         />
         <label>بلیط</label>
         <MultiFileUploader
-          files={data.Ticket}
-          onChange={(f) => setFile("ticket", f)}
+          idfiles={data.Ticket}
+          onChange={(idfiles) => setFile("ticket", idfiles)}
         />
         <label>هتل</label>
         <MultiFileUploader
-          files={data.Hotel}
-          onChange={(f) => setFile("hotel", f)}
+          idfiles={data.Hotel}
+          onChange={(idfiles) => setFile("hotel", idfiles)}
         />
         <label>اسناد پرداخت به مامور</label>
         <MultiFileUploader
-          files={data.Payments}
-          onChange={(f) => setFile("Payments", f)}
+          idfiles={data.Payments}
+          onChange={(idfiles) => setFile("Payments", idfiles)}
         />
         <label>سایر مدارک</label>
         <MultiFileUploader
-          files={data.OtherFiles}
-          onChange={(f) => setFile("OtherFiles", f)}
+          idfiles={data.OtherFiles}
+          onChange={(idfiles) => setFile("OtherFiles", idfiles)}
         />
-      </div>
+      </div> 
       {messageText && (
         <Message
           text={messageText}

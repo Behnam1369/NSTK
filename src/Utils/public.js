@@ -16,14 +16,25 @@ export const thousandSep = (num) => {
   if (!num) {
     return "";
   }
-  let parts = num
-    .toString()
-    .replace(/[^0-9.]/g, "")
-    .split(".");
-  parts[0] = parseInt(parts[0])
-    .toString()
-    .replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-  return parts.filter((part, i) => i < 2).join(".");
+  if (num >= 0) {
+    let parts = num
+      .toString()
+      .replace(/[^0-9.]/g, "")
+      .split(".");
+    parts[0] = parseInt(parts[0])
+      .toString()
+      .replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    return parts.filter((part, i) => i < 2).join(".");
+  } else {
+    let parts = num
+      .toString()
+      .replace(/[^0-9.]/g, "")
+      .split(".");
+    parts[0] = parseInt(parts[0])
+      .toString()
+      .replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    return "-" + parts.filter((part, i) => i < 2).join(".");
+  }
 };
 
 export const toNumber = (num) => {

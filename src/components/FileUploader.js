@@ -4,23 +4,30 @@ import { host } from "../Utils/host";
 import { MdOutlineAttachFile, MdOutlineClear } from "react-icons/md";
 import { fileSize } from "../Utils/public";
 import style from "./FileUploader.module.scss";
+import { v4 as uuidv4 } from "uuid";
 
 export default function FileUploader(props) {
   const [progress, setProgress] = useState(0);
   const [uploadState, setUploadState] = useState("Empty");
   const [file, setFile] = useState(null);
+  const [idfile, setIdfile] = useState(props.idfile);
   const fileInput = useRef();
 
   useEffect(() => {
-    if (props.file && props.file.IdAttachment) {
-      setFile({
-        name: props.file.Name,
-        size: props.file.Size,
-        title: props.file.Title,
+    const loadData = async () => {
+    await axios
+      .get(`${host}/file/${idfile}`)
+      .then((res) => {
+        const f = res.data.file;
+        setFile({name: f.Name, size: f.Size, title: f.Title});
+        setUploadState("Uploaded");
       });
-      setUploadState("Uploaded");
+    };
+
+    if (idfile && !isNaN(idfile)) {
+      loadData();
     }
-  }, []);
+  }, [idfile])
 
   const uploadFile = (e) => {
     const file = e.target.files[0];
@@ -39,18 +46,8 @@ export default function FileUploader(props) {
     setUploadState("Uploading");
     axios.post(`${host}/file`, formData, options).then((res) => {
       setUploadState("Uploaded");
-      setFile({
-        idattachment: res.data.file.IdAttachment,
-        name: res.data.file.Name,
-        size: res.data.file.Size,
-        title: res.data.file.Title,
-      });
-      props.onChange({
-        IdAttachment: res.data.file.IdAttachment,
-        Name: res.data.file.Name,
-        Size: res.data.file.Size,
-        Title: res.data.file.Title,
-      });
+      setIdfile(res.data.file.IdAttachment);
+      props.onChange(res.data.file.IdAttachment);
     });
   };
 
@@ -74,7 +71,7 @@ export default function FileUploader(props) {
     e.stopPropagation();
     setFile(null);
     setUploadState("Empty");
-    props.onChange(null);
+    props.onChange(uuidv4());
   };
 
   return (
