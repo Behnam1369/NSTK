@@ -6,16 +6,18 @@ import style from "./MultiFileUploader.module.scss";
 
 export default function MultiFileUploader(props) {
 
-  const [idfiles, setIdfiles] = useState(props.idfiles.split(","));
+  const [idfiles, setIdfiles] = useState('');
   const btn = useRef(null);
 
   useEffect(() => {
+    setIdfiles(props.idfiles.split(","))
     if (props.idfiles == "") 
       setIdfiles([uuidv4()]);
   }, [props.idfiles]);
 
   const handleFileUpdate = (oldid, newid) => {
-    setIdfiles(idfiles.map((idfile) => (idfile === oldid ? newid : idfile)));
+    const newIdFiles = idfiles.map((idfile) => (idfile === oldid ? newid : idfile));
+    setIdfiles(newIdFiles);
     props.onChange(idfiles.join(","));
   };
 
