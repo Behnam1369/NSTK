@@ -4,6 +4,7 @@ import Mission from "./pages/Mission/Mission";
 import MissionPayments from "./pages/Mission/MissionPayments";
 import MissionReports from "./pages/Mission/MissionReports";
 import PR from "./pages/PR/PR";
+import PurchaseRequest from "./pages/PurchaseRequest/PurchaseRequest";
 export const AppContext = React.createContext();
 
 function App() {
@@ -42,6 +43,14 @@ function App() {
             />
             <Route path="/users/:iduser/pr/:idpr" element={<PR />} />
             <Route path="/users/:iduser/pr/new" element={<PR />} />
+            <Route
+              path="/users/:iduser/purchase_request/:idpurchaserequest"
+              element={<PurchaseRequest />}
+            />
+            <Route
+              path="/users/:iduser/purchase_request/new"
+              element={<PurchaseRequest />}
+            />
             <Route path="*" element={<h1>404</h1>} />
           </Routes>
         </BrowserRouter>
