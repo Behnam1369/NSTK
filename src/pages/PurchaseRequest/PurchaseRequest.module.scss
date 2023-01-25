@@ -1,0 +1,63 @@
+@import "../../public.scss";
+
+.grid {
+  display: flex;
+  flex-direction: column;
+  grid-column: 1/3;
+  gap: 2px;
+  background-color: transparent;
+
+  > div {
+    display: grid;
+    grid-template-columns: 1fr 80px 70px 1fr 25px;
+    grid-gap: 2px;
+    align-items: center;
+
+    > input {
+      min-width: 50px;
+    }
+
+    .btnAdd,
+    .btnRemove {
+      color: $main-color;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: IranSansLight;
+      font-size: 12px;
+      padding: 5px;
+      width: 25px;
+      height: 25px;
+      border-radius: 50%;
+      padding: 0;
+
+      &:hover {
+        cursor: pointer;
+        color: orangered;
+      }
+    }
+  }
+
+  .header {
+    background-color: $main-color;
+    color: white;
+    display: flex;
+    justify-content: center;
+    font-family: IranSansLight;
+    font-size: 12px;
+    padding: 5px;
+    border-bottom: solid 2px black;
+  }
+}
+
+@media screen and (max-width: 750px) {
+  h1 {
+    grid-column: 1/1;
+  }
+
+  .header {
+    font-size: 10px !important;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+}
