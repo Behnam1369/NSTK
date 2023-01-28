@@ -306,7 +306,7 @@ export default function PR() {
         </button>
       </div>
       <FormContainer dir="rtl">
-        <h1>درخواست پرداخت</h1>
+        <h1>درخواست خرید کالا / خدمات</h1>
         {data.State == 1 && <h2 className={style.cancelled}>ابطال شده</h2>}
         <label>سریال</label>
         <span>{data.IdPurchaseRequest}</span>
