@@ -15,11 +15,9 @@ export default function FileUploader(props) {
 
   useEffect(() => {
     const loadData = async () => {
-    await axios
-      .get(`${host}/file/${idfile}`)
-      .then((res) => {
+      await axios.get(`${host}/file/${idfile}`).then((res) => {
         const f = res.data.file;
-        setFile({name: f.Name, size: f.Size, title: f.Title});
+        setFile({ name: f.Name, size: f.Size, title: f.Title });
         setUploadState("Uploaded");
       });
     };
@@ -27,7 +25,7 @@ export default function FileUploader(props) {
     if (idfile && !isNaN(idfile)) {
       loadData();
     }
-  }, [idfile])
+  }, [idfile]);
 
   const uploadFile = (e) => {
     const file = e.target.files[0];
@@ -44,11 +42,13 @@ export default function FileUploader(props) {
     };
 
     setUploadState("Uploading");
-    axios.post(`${host}/file`, formData, options).then((res) => {
-      setUploadState("Uploaded");
-      setIdfile(res.data.file.IdAttachment);
-      props.onChange(res.data.file.IdAttachment);
-    });
+    axios
+      .post(`https://portal.spii.co.com:3000/file`, formData, options)
+      .then((res) => {
+        setUploadState("Uploaded");
+        setIdfile(res.data.file.IdAttachment);
+        props.onChange(res.data.file.IdAttachment);
+      });
   };
 
   const handleClick = () => {
