@@ -408,7 +408,7 @@ export default function PR() {
   };
   const handlePrint = (e) => {
     e.preventDefault();
-    if (idpr) {
+    if (data.IdPr) {
       window.parent.postMessage(
         {
           title: "print",
