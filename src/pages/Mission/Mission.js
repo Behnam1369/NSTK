@@ -8,10 +8,13 @@ import Timepicker from "../../components/Timepicker";
 import MultiFileUploader from "../../components/MultiFileUploader";
 import Selector from "../../components/Selector";
 import { BsTrash } from "react-icons/bs";
-import { IoAttachOutline, IoPrintOutline, IoSaveOutline } from "react-icons/io5";
+import { IoPrintOutline, IoSaveOutline } from "react-icons/io5";
+import { AiOutlineCalculator } from "react-icons/ai";
 import Message from "../../components/Message";
 import AmountInput from "../../components/AmountInput";
 import { shamsiDate } from "../../Utils/public";
+import Modal from "../../components/Modal";
+import MissionFee from "./MissionFee";
 
 const missionTypes = [
   { id: 1, title: "ماموریت داخلی" },
@@ -22,7 +25,7 @@ const requirements = [
   { id: 1, title: "دعوت نامه" },
   { id: 2, title: "ویزا" },
   { id: 3, title: "بلیط" },
-]
+];
 
 export default function Mission(props) {
   const [messageText, setMessageText] = useState(false);
@@ -31,6 +34,7 @@ export default function Mission(props) {
   const [users, setUsers] = useState([]);
   const [curs, setCurs] = useState([]);
   const [objectives, setObjectives] = useState([]);
+  const [showMissionFee, setShowMissionFee] = useState(false);
 
   const defaultData = {
     IdWorkMission: null,
@@ -62,9 +66,9 @@ export default function Mission(props) {
     Note: "",
     CommissionPermit: "",
     ShastanPermit: "",
-    LeavePermit:"",
+    LeavePermit: "",
     MissionOrder: "",
-    Visa:"",
+    Visa: "",
     Ticket: "",
     Hotel: "",
     Payments: "",
@@ -77,15 +81,15 @@ export default function Mission(props) {
   useEffect(() => {
     const loadData = async () => {
       await axios
-        .get(`${host}/users/${iduser}/work_missions/${idmission || 'new'}`)
+        .get(`${host}/users/${iduser}/work_missions/${idmission || "new"}`)
         .then((res) => {
           let loaded_users = res.data.data.users;
           setUsers(loaded_users);
           setObjectives(res.data.data.work_mission_objectives);
           setCurs(res.data.data.currencies);
-          
+
           if (idmission) {
-            updateSelectedUsers(res.data.data.work_missioners, loaded_users)
+            updateSelectedUsers(res.data.data.work_missioners, loaded_users);
             setData(res.data.data.work_mission);
           }
         });
@@ -106,11 +110,13 @@ export default function Mission(props) {
       })
     );
 
-    setData({...data, 
-      WorkMissioners: arr.filter(user => user.selected).map(
-        user => user.Fname + " " + user.Lname
-      ).join("، ")
-    })
+    setData({
+      ...data,
+      WorkMissioners: arr
+        .filter((user) => user.selected)
+        .map((user) => user.Fname + " " + user.Lname)
+        .join("، "),
+    });
   };
 
   const handleUpdate = (e) => {
@@ -118,11 +124,11 @@ export default function Mission(props) {
   };
 
   const setTime = (name, val) => {
-    setData({ ...data, [name]: val  });
+    setData({ ...data, [name]: val });
   };
 
   const setDate = (name, val) => {
-    setData({ ...data, [name]: val, [name+"Shamsi"]: shamsiDate(val) });
+    setData({ ...data, [name]: val, [name + "Shamsi"]: shamsiDate(val) });
   };
 
   const setFile = (name, val) => {
@@ -137,13 +143,15 @@ export default function Mission(props) {
         .map((user) => {
           return { ...user, selected: !user.selected };
         }),
-    ]
+    ];
     setUsers(newArr);
-    setData({...data, 
-      WorkMissioners: newArr.filter(user => user.selected).map(
-        user => user.Fname + " " + user.Lname
-      ).join("، ")
-    })
+    setData({
+      ...data,
+      WorkMissioners: newArr
+        .filter((user) => user.selected)
+        .map((user) => user.Fname + " " + user.Lname)
+        .join("، "),
+    });
   };
 
   const handleSave = async (e) => {
@@ -154,7 +162,9 @@ export default function Mission(props) {
       iduser,
       work_missioners: users
         .filter((user) => user.selected)
-        .map((user) => {return {IdUser: user.IdUser}} )
+        .map((user) => {
+          return { IdUser: user.IdUser };
+        }),
     };
 
     await axios.post(`${host}/work_missions`, doc).then((res) => {
@@ -197,11 +207,19 @@ export default function Mission(props) {
   };
 
   const handleRequirementUpdate = (e) => {
-    if (data.IdRequirement.split(',').includes(e.target.value.toString())) {
+    if (data.IdRequirement.split(",").includes(e.target.value.toString())) {
       setData({
         ...data,
-        IdRequirement: data.IdRequirement.split(',').filter((item) => item != e.target.value).join(','),
-        Requirements: data.Requirements.split(',').filter((item) => item != requirements.find((type) => type.id == e.target.value).title).join(','),
+        IdRequirement: data.IdRequirement.split(",")
+          .filter((item) => item != e.target.value)
+          .join(","),
+        Requirements: data.Requirements.split(",")
+          .filter(
+            (item) =>
+              item !=
+              requirements.find((type) => type.id == e.target.value).title
+          )
+          .join(","),
       });
       return;
     } else {
@@ -209,35 +227,42 @@ export default function Mission(props) {
         setData({
           ...data,
           IdRequirement: e.target.value,
-          Requirements: requirements.find((type) => type.id == e.target.value).title,
+          Requirements: requirements.find((type) => type.id == e.target.value)
+            .title,
         });
       } else {
-        let id = data.IdRequirement.split(',');
+        let id = data.IdRequirement.split(",");
         id.push(e.target.value);
-        let title = data.Requirements.split(',');
-        title.push(requirements.find((type) => type.id == e.target.value).title);
+        let title = data.Requirements.split(",");
+        title.push(
+          requirements.find((type) => type.id == e.target.value).title
+        );
         setData({
           ...data,
-          IdRequirement: id.join(','),
-          Requirements: title.join(','),
+          IdRequirement: id.join(","),
+          Requirements: title.join(","),
         });
       }
     }
-  }
+  };
 
   const handleAmountChange = (val) => {
     setData({ ...data, PettyCashAmount: val });
   };
 
   const handleCurSelect = (idcur) => {
-    setData({ ...data, IdCur: idcur, Abr: curs.find((cur) => cur.IdCur == idcur).Abr });
-  }
+    setData({
+      ...data,
+      IdCur: idcur,
+      Abr: curs.find((cur) => cur.IdCur == idcur).Abr,
+    });
+  };
 
   const handlePettyCashHolderSelect = (iduser) => {
     var user = users.find((user) => user.IdUser == iduser);
     var fullname = user.Fname + " " + user.Lname;
     setData({ ...data, IdPettyCashHolder: iduser, PettyCashHolder: fullname });
-  }
+  };
 
   const handlePrint = (e) => {
     e.preventDefault();
@@ -246,7 +271,7 @@ export default function Mission(props) {
         {
           title: "print",
           endpoint: "PrintWorkMission",
-          args: { idworkmission: data.IdWorkMission},
+          args: { idworkmission: data.IdWorkMission },
           tabTitle: `چاپ درخواست ماموریت ${data.IdWorkMission}`,
           tabno,
         },
@@ -257,7 +282,14 @@ export default function Mission(props) {
     }
   };
 
-
+  const handleFee = (e) => {
+    e.preventDefault();
+    if (!data.IdWorkMission) {
+      setMessageText("ابتدا سند را ذخیره کنید");
+      return;
+    }
+    setShowMissionFee(true);
+  };
 
   return (
     <div>
@@ -276,6 +308,13 @@ export default function Mission(props) {
         >
           <IoPrintOutline />
           <span>چاپ</span>
+        </button>
+        <button
+          className={`${style.operationButton}`}
+          onClick={(e) => handleFee(e)}
+        >
+          <AiOutlineCalculator />
+          <span>محاسبه حق ماموریت</span>
         </button>
       </div>
 
@@ -320,7 +359,9 @@ export default function Mission(props) {
                     type="checkbox"
                     value={requirement.id}
                     onChange={(e) => handleRequirementUpdate(e)}
-                    checked={data.IdRequirement.split(',').includes(requirement.id.toString())}
+                    checked={data.IdRequirement.split(",").includes(
+                      requirement.id.toString()
+                    )}
                   />
                   {requirement.title}
                 </label>
@@ -361,9 +402,14 @@ export default function Mission(props) {
                   name="IdWorkMissionObjective"
                   value={objective.IdWorkMissionObjective}
                   onChange={(e) => {
-                    setData({...data, 
+                    setData({
+                      ...data,
                       IdWorkMissionObjective: e.target.value,
-                      WorkMissionObjective: objectives.find(objective => objective.IdWorkMissionObjective == e.target.value)["Title"] })
+                      WorkMissionObjective: objectives.find(
+                        (objective) =>
+                          objective.IdWorkMissionObjective == e.target.value
+                      )["Title"],
+                    });
                   }}
                   checked={
                     objective.IdWorkMissionObjective ==
@@ -597,7 +643,7 @@ export default function Mission(props) {
           idfiles={data.OtherFiles}
           onChange={(idfiles) => setFile("OtherFiles", idfiles)}
         />
-      </div> 
+      </div>
       {messageText && (
         <Message
           text={messageText}
@@ -605,6 +651,15 @@ export default function Mission(props) {
             setMessageText(result);
           }}
         />
+      )}
+      {showMissionFee && (
+        <Modal>
+          <MissionFee
+            idmission={data.IdWorkMission}
+            iduser={iduser}
+            onClose={() => setShowMissionFee(false)}
+          />
+        </Modal>
       )}
     </div>
   );
