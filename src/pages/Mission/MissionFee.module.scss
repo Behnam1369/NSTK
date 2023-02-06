@@ -1,0 +1,75 @@
+@import "../../public.scss";
+
+.main {
+  background-color: white;
+  border-radius: 5px;
+  width: 1000px;
+  height: 600px;
+  font-family: IranSansLight;
+
+  .header {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    direction: rtl;
+    align-items: center;
+    padding: 10px;
+    border-bottom: solid 1px silver;
+    margin-bottom: 10px;
+    h1 {
+      font-size: 18px;
+      font-weight: 600;
+      margin: 0;
+      padding: 0;
+    }
+
+    svg {
+      color: red;
+      font-size: 22px;
+      &:hover {
+        cursor: pointer;
+        color: maroon;
+      }
+    }
+  }
+
+  .body {
+    padding: 10px;
+    direction: rtl;
+    .heading {
+      background-color: $main-color;
+      color: $c1;
+    }
+    .row {
+      display: grid;
+      grid-template-columns: 1.5fr 1fr 1fr 1fr 1fr 1fr;
+      gap: 1px;
+
+      > div {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border: solid 1px $c1;
+        padding: 5px;
+      }
+    }
+  }
+
+  .footer {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    direction: rtl;
+
+    .formButton {
+      margin: 10px;
+      padding: 8px;
+    }
+  }
+
+  p {
+    text-align: center;
+    direction: rtl;
+  }
+}
