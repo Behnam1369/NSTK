@@ -1,0 +1,48 @@
+.main {
+  background-color: white;
+  padding: 10px;
+  position: relative;
+  border: solid 1px silver;
+  > div:nth-child(1) {
+    display: flex;
+    justify-content: space-between;
+
+    > input {
+      border: none;
+      outline: none;
+      font-family: initial;
+      font-size: 18px;
+      font-weight: bold;
+    }
+  }
+
+  .add {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    left: 0px;
+    height: 2px;
+    display: none;
+    z-index: 1;
+
+    button {
+      height: 22px;
+      background-color: #2c2ca7;
+      color: whitesmoke;
+      position: absolute;
+      top: -11px;
+      left: 15px;
+      border-radius: 5px;
+    }
+  }
+}
+
+.main:hover {
+  .add {
+    background-color: #2c2ca7;
+    display: block;
+    button {
+      cursor: pointer;
+    }
+  }
+}
