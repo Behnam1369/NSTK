@@ -1,0 +1,54 @@
+.main {
+  display: grid;
+  grid-template-columns: calc(100% - 300px) 300px;
+  height: 100%;
+  width: 100%;
+  box-sizing: border-box;
+
+  > div:nth-child(1) {
+    padding: 10px;
+    box-sizing: border-box;
+  }
+
+  > div:nth-child(2) {
+    padding: 10px;
+    position: relative;
+
+    input.searchField {
+      width: calc(100% - 25px);
+      padding: 5px;
+      border-radius: 5px;
+      margin: 3px 10px;
+      outline: none;
+      box-sizing: border-box;
+      border: solid 1px silver;
+    }
+
+    ul {
+      position: absolute;
+      top: 30px;
+      max-height: 90vh;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding: 5px;
+      width: calc(100% - 20px);
+      box-sizing: border-box;
+
+      .field {
+        cursor: pointer;
+        transition: linear 0.2s;
+        list-style: none;
+        padding: 5px;
+        border-radius: 5px;
+        background-color: yellow;
+        margin: 5px;
+        width: 100%;
+        box-sizing: border-box;
+
+        &:hover {
+          background-color: yellowgreen;
+        }
+      }
+    }
+  }
+}
