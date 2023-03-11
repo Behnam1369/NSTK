@@ -1,6 +1,7 @@
 import { useContext, useEffect, useState } from "react";
 import {
   IoAttachOutline,
+  IoPrintOutline,
   IoSaveOutline,
   IoTrashOutline,
 } from "react-icons/io5";
@@ -81,6 +82,7 @@ export default function MissionReports(props) {
       .then((res) => {
         setReports(res.data.reports);
         setAchievements(res.data.achievements);
+        setMissioner(res.data.missioner);
         window.parent.postMessage({ title: "loaded", tabno }, "*");
       });
   };
@@ -151,10 +153,11 @@ export default function MissionReports(props) {
 
   const handleSave = (e) => {
     e.preventDefault();
+    console.log(missioner);
     setSaving(true);
     axios
       .post(
-        `${host}/users/${iduser}/work_missions/${idmission}/missioners/${idmissioner}/reports`,
+        `${host}/users/${iduser}/work_missions/${idmission}/missioners/${missioner.IdWorkMissioner}/reports`,
         {
           ...missioner,
           work_mission_reports_attributes: reports,
@@ -222,6 +225,21 @@ export default function MissionReports(props) {
   //   setMissioner({ ...missioner, [name]: val });
   // };
 
+  const handlePrint = (e) => {
+    e.preventDefault();
+
+    window.parent.postMessage(
+      {
+        title: "print",
+        endpoint: "PrintWorkMissionReport",
+        args: { idworkmission: idmission, idmissioner: iduser },
+        tabTitle: `چاپ گزارش ماموریت ${idmission}`,
+        tabno,
+      },
+      "*"
+    );
+  };
+
   return (
     <div>
       <div className={`${style.operationButtons}`} dir="rtl">
@@ -231,6 +249,13 @@ export default function MissionReports(props) {
         >
           <IoSaveOutline />
           <span>ذخیره</span>
+        </button>
+        <button
+          className={`${style.operationButton}`}
+          onClick={(e) => handlePrint(e)}
+        >
+          <IoPrintOutline />
+          <span>چاپ</span>
         </button>
       </div>
       <FormContainer dir="rtl" style={{ marginBottom: "150px" }}>
