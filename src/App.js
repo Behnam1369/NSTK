@@ -3,6 +3,7 @@ import { Routes, Route, BrowserRouter } from "react-router-dom";
 import Mission from "./pages/Mission/Mission";
 import MissionPayments from "./pages/Mission/MissionPayments";
 import MissionReports from "./pages/Mission/MissionReports";
+import PiPattern from "./pages/PiPattern/Pattern";
 import PR from "./pages/PR/PR";
 import PurchaseRequest from "./pages/PurchaseRequest/PurchaseRequest";
 export const AppContext = React.createContext();
@@ -50,6 +51,10 @@ function App() {
             <Route
               path="/users/:iduser/purchase_request/new"
               element={<PurchaseRequest />}
+            />
+            <Route
+              path="/users/:iduser/pi/:idpi/pi_pattern/new"
+              element={<PiPattern />}
             />
             <Route path="*" element={<h1>404</h1>} />
           </Routes>
