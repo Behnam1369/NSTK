@@ -8,9 +8,23 @@ import {
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import style from "./PatternItem.module.scss";
+import { FiChevronUp, FiChevronDown } from "react-icons/fi";
 
 const PatternItem = forwardRef(
-  ({ title, text, changeTitle, changeText, addItem, pi, onEdit }, ref) => {
+  (
+    {
+      title,
+      text,
+      changeTitle,
+      changeText,
+      addItem,
+      pi,
+      onEdit,
+      moveUp,
+      moveDown,
+    },
+    ref
+  ) => {
     const [editing, setEditing] = useState(false);
     const [spannedText, setSpannedText] = useState(spanned(text));
     const quillRef = useRef(null);
@@ -68,10 +82,6 @@ const PatternItem = forwardRef(
       console.log(e);
     };
 
-    const handleUp = (e) => {
-      e.preventDefault();
-    };
-
     return (
       <div className={style.main}>
         <div>
@@ -85,7 +95,12 @@ const PatternItem = forwardRef(
             <button onClick={() => handleEdit()}>
               {editing ? "Confirm" : "Edit"}
             </button>
-            <button onClick={(e) => handleUp(e)}>Move Up</button>
+            <button onClick={moveUp}>
+              <FiChevronUp />
+            </button>
+            <button onClick={moveDown}>
+              <FiChevronDown />
+            </button>
           </div>
         </div>
         {editing && (

@@ -119,6 +119,33 @@ export default function PiPattern() {
     setEditingItem(id);
   };
 
+  const moveUp = (index) => {
+    if (index > 0)
+      setItems([
+        ...items.map((item, i) => {
+          if (i === index - 1) {
+            return items[index];
+          } else if (i === index) {
+            return items[index - 1];
+          }
+          return item;
+        }),
+      ]);
+  };
+  const moveDown = (index) => {
+    if (index < items.length - 1)
+      setItems([
+        ...items.map((item, i) => {
+          if (i === index + 1) {
+            return items[index];
+          } else if (i === index) {
+            return items[index + 1];
+          }
+          return item;
+        }),
+      ]);
+  };
+
   return (
     <div className={style.main}>
       <div>
@@ -137,6 +164,8 @@ export default function PiPattern() {
             pi={pi}
             onEdit={() => handleEdit(el.id)}
             ref={el.id === editingItem ? editingRef : null}
+            moveUp={() => moveUp(i)}
+            moveDown={() => moveDown(i)}
           />
         ))}
       </div>
