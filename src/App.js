@@ -56,6 +56,10 @@ function App() {
               path="/users/:iduser/pi/:idpi/pi_pattern/new"
               element={<PiPattern />}
             />
+            <Route
+              path="/users/:iduser/pi/:idpi/pi_pattern/:idpipattern"
+              element={<PiPattern />}
+            />
             <Route path="*" element={<h1>404</h1>} />
           </Routes>
         </BrowserRouter>
