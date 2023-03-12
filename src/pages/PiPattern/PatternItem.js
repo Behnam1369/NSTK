@@ -14,22 +14,24 @@ const PatternItem = forwardRef(
   (
     {
       title,
-      text,
+      formula,
       changeTitle,
-      changeText,
+      changeFormula,
       addItem,
       pi,
       onEdit,
       moveUp,
       moveDown,
+      changeType,
+      index,
     },
     ref
   ) => {
     const [editing, setEditing] = useState(false);
-    const [spannedText, setSpannedText] = useState(spanned(text));
+    const [spannedFormula, setSpannedFormula] = useState(spanned(formula));
     const quillRef = useRef(null);
 
-    const evalTExt = text.replace(/{([^}]+)}/g, (match, expression) => {
+    const evalFormula = formula.replace(/{([^}]+)}/g, (match, expression) => {
       try {
         const result = eval(expression);
         return result;
@@ -39,21 +41,19 @@ const PatternItem = forwardRef(
     });
 
     useEffect(() => {
-      setSpannedText(spanned(text));
-    }, [text]);
+      setSpannedFormula(spanned(formula));
+    }, [formula]);
 
-    const handleChangeText = (value) => {
+    const handleChangeFormula = (value) => {
       const unSpannedValue = unSpanned(value);
-      if (unSpannedValue !== text) {
-        changeText(unSpannedValue);
-        setSpannedText(value);
+      if (unSpannedValue !== formula) {
+        changeFormula(unSpannedValue, evalFormula);
+        setSpannedFormula(value);
       }
     };
 
     const handleInsertExpression = (expression) => {
       const quill = quillRef.current.getEditor();
-      // const selectionIndex = quill.getSelection();
-      // // console.log(quillRef.current);
       if (selection) {
         quill.deleteText(selection.index, selection.length);
         quill.insertText(selection.index, `{${expression}}`);
@@ -79,7 +79,6 @@ const PatternItem = forwardRef(
     const [selection, setSelection] = useState(null);
     const handleBlur = (e) => {
       setSelection(e);
-      console.log(e);
     };
 
     return (
@@ -101,21 +100,30 @@ const PatternItem = forwardRef(
             <button onClick={moveDown}>
               <FiChevronDown />
             </button>
+            <select onChange={(e) => changeType(e.target.value)}>
+              <option>Normal</option>
+              <option>Price</option>
+            </select>
           </div>
         </div>
         {editing && (
           <ReactQuill
             theme="snow"
-            value={spannedText}
-            onChange={(val) => handleChangeText(val)}
+            value={spannedFormula}
+            onChange={(val) => handleChangeFormula(val)}
             ref={quillRef}
             onBlur={(e) => handleBlur(e)}
             onFocus={onEdit}
           />
         )}
-        {!editing && <div dangerouslySetInnerHTML={{ __html: evalTExt }} />}
+        {!editing && (
+          <div
+            className={style.text}
+            dangerouslySetInnerHTML={{ __html: evalFormula }}
+          />
+        )}
         <div class={style.add}>
-          <button onClick={(e) => handleAdd(e)}>Add Item</button>
+          <button onClick={(e) => handleAdd(e)}>Add Item ({index + 2}) </button>
         </div>
       </div>
     );
