@@ -1,3 +1,5 @@
+@import "../../public.scss";
+
 .main {
   display: grid;
   grid-template-columns: calc(100% - 300px) 300px;
@@ -5,14 +7,28 @@
   width: 100%;
   box-sizing: border-box;
 
+  .title {
+    border: none;
+    font-size: 28px;
+    outline: none;
+    padding: 10px;
+    background-color: transparent;
+  }
+
   > div:nth-child(1) {
     padding: 10px;
     box-sizing: border-box;
+
+    .saveButton {
+      margin-top: 30px;
+    }
   }
 
   > div:nth-child(2) {
     padding: 10px;
-    position: relative;
+    position: fixed;
+    right: 5px;
+    width: 280px;
 
     input.searchField {
       width: calc(100% - 25px);
@@ -40,13 +56,14 @@
         list-style: none;
         padding: 5px;
         border-radius: 5px;
-        background-color: yellow;
+        background-color: #401786;
+        color: white;
         margin: 5px;
         width: 100%;
         box-sizing: border-box;
 
         &:hover {
-          background-color: yellowgreen;
+          background-color: #6034ac;
         }
       }
     }
