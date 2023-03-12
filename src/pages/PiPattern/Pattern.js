@@ -1,6 +1,11 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import PatternItem from "./PatternItem";
 import style from "./Pattern.module.scss";
+import { host } from "../../Utils/host";
+import { useParams, useSearchParams } from "react-router-dom";
+import axios from "axios";
+import { IoSaveOutline } from "react-icons/io5";
+import Message from "../../components/Message";
 
 const defaultPi = {
   IdPI: 500650,
@@ -62,26 +67,62 @@ export default function PiPattern() {
   const [searchField, setSearchField] = useState("");
   const [editingItem, setEditingItem] = useState(null);
   const editingRef = useRef();
+  const [title, setTitle] = useState("New Pattern");
+  const [messageText, setMessageText] = useState(false);
+
+  let { iduser, idpi } = useParams();
+  const [idpipattern, setIdpipattern] = useState(useParams().idpipattern);
+  const [searchParams] = useSearchParams();
+  const tabno = searchParams.get("tabno");
 
   const [items, setItems] = useState([
     {
       id: new Date().getTime(),
       title: "Reference",
-      formula: "",
-      text: "2 + 2 = {2 + 2} is it correct {1+5}",
+      formula: "2 + 2 = {2 + 2} is it correct {1+5} ",
+      text: "2 + 2 = 4 is it correct 6 ",
     },
   ]);
 
-  const changeText = (id, text) => {
+  console.log(items);
+
+  useEffect(() => {
+    if (!idpipattern)
+      window.parent.postMessage({ title: "loaded", tabno }, "*");
+    const loadData = async () => {
+      await axios
+        .get(`${host}/users/${iduser}/pi/${idpi}/pi_pattern/${idpipattern}`)
+        .then((res) => {
+          // console.log(JSON.parse(res.data.result[0].PiPatternItm));
+          setPi(JSON.parse(res.data.result[0].Pi)[0]);
+          setTitle(JSON.parse(res.data.result[0].PiPattern)[0].Title);
+          setItems(
+            JSON.parse(res.data.result[0].PiPatternItm).map((el) => {
+              return {
+                id: el.IdPiPatternItm,
+                title: el.Title,
+                formula: el.Formula,
+                text: el.Text,
+              };
+            })
+          );
+        });
+    };
+    loadData();
+    window.parent.postMessage({ title: "loaded", tabno }, "*");
+  }, []);
+
+  const handleChangeFormula = (id, f, t) => {
     const newItems = items.map((el) => {
       if (el.id === id) {
-        return { ...el, text };
+        return { ...el, formula: f, text: t };
       }
       return el;
     });
     setItems(newItems);
   };
 
+  console.log(items);
   const changeTitle = (id, e) => {
     const newItems = items.map((el) => {
       if (el.id === id) {
@@ -102,15 +143,15 @@ export default function PiPattern() {
       {
         id: new Date().getTime(),
         title: "",
-        formula: "write your text here",
-        text: "write your text here",
+        formula: "<p></p>",
+        text: "",
+        type: "normal",
       },
       ...items.filter((el, ind) => ind > i),
     ]);
   };
 
   const handleInsertExpression = (txt, e) => {
-    console.log(editingRef.current);
     e.preventDefault();
     editingRef.current.handleInsertExpression(txt);
   };
@@ -146,17 +187,88 @@ export default function PiPattern() {
       ]);
   };
 
+  const [saving, setSaving] = useState(false);
+
+  const handleSave = async (e) => {
+    e.preventDefault();
+    setSaving(true);
+    if (!idpipattern) {
+      await axios
+        .post(`${host}/users/${1}/pi_pattern`, {
+          VchType: pi.VchType,
+          Title: title,
+          pi_pattern_itms_attributes: items.map((el) => {
+            return {
+              Title: el.title,
+              Formula: el.formula,
+              Text: el.text,
+              Type: el.type,
+            };
+          }),
+        })
+        .then((res) => {
+          setSaving(false);
+          setIdpipattern(res.data.data.IdPiPattern);
+          setMessageText("اطلاعات با موفقیت ذخیره شد");
+        })
+        .catch((err) => {
+          console.log(err);
+          setSaving(false);
+          setMessageText("خطا در ثبت اطلاعات");
+        });
+    } else {
+      await axios
+        .patch(`${host}/users/${1}/pi_pattern/${idpipattern}`, {
+          VchType: pi.VchType,
+          Title: title,
+          pi_pattern_itms_attributes: items.map((el) => {
+            return {
+              Title: el.title,
+              Formula: el.formula,
+              Text: el.text,
+              Type: el.type,
+            };
+          }),
+        })
+        .then((res) => {
+          setSaving(false);
+          setIdpipattern(res.data.data.IdPiPattern);
+          setMessageText("اطلاعات با موفقیت ذخیره شد");
+        })
+        .catch((err) => {
+          setSaving(false);
+          setMessageText("خطا در ثبت اطلاعات");
+        });
+    }
+  };
+
+  const changeType = (id, type) => {
+    setItems([
+      ...items.map((el) => {
+        if (el.id === id) {
+          return { ...el, type };
+        }
+        return el;
+      }),
+    ]);
+  };
+
   return (
     <div className={style.main}>
       <div>
-        <h1>PI Pattern</h1>
+        <input
+          type="text"
+          className={style.title}
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+        />
 
         {items.map((el, i) => (
           <PatternItem
             key={el.id}
             title={el.title}
-            text={el.text}
-            changeText={(t) => changeText(el.id, t)}
+            formula={el.formula}
+            changeFormula={(f, t) => handleChangeFormula(el.id, f, t)}
             changeTitle={(t) => {
               changeTitle(el.id, t);
             }}
@@ -166,8 +278,20 @@ export default function PiPattern() {
             ref={el.id === editingItem ? editingRef : null}
             moveUp={() => moveUp(i)}
             moveDown={() => moveDown(i)}
+            changeType={(type) => changeType(el.id, type)}
+            index={i}
           />
         ))}
+        <div>
+          <button
+            className={`${style.formButton} ${style.saveButton}`}
+            disabled={saving}
+            onClick={(e) => handleSave(e)}
+          >
+            <IoSaveOutline />
+            <span>{saving ? "درحال ذخیره" : "ذخیره"}</span>
+          </button>
+        </div>
       </div>
       <div>
         <input
@@ -193,6 +317,14 @@ export default function PiPattern() {
             ))}
         </ul>
       </div>
+      {messageText && (
+        <Message
+          text={messageText}
+          setShow={(result) => {
+            setMessageText(result);
+          }}
+        />
+      )}
     </div>
   );
 }
