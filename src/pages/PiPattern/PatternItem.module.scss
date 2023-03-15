@@ -14,6 +14,32 @@
       font-size: 18px;
       font-weight: bold;
     }
+
+    > div {
+      display: flex;
+      gap: 5px;
+
+      button {
+        border: solid 1px #401786;
+        background-color: white;
+        color: #401786;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        border-radius: 2px;
+
+        &:hover {
+          background-color: #d7ccea;
+        }
+      }
+
+      select {
+        color: #401786;
+        border: solid 1px #401786;
+        border-radius: 2px;
+      }
+    }
   }
 
   .add {

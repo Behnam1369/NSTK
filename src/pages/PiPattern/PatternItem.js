@@ -8,7 +8,7 @@ import {
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import style from "./PatternItem.module.scss";
-import { FiChevronUp, FiChevronDown } from "react-icons/fi";
+import { FiChevronUp, FiChevronDown, FiEdit, FiCheck } from "react-icons/fi";
 
 const PatternItem = forwardRef(
   (
@@ -92,7 +92,7 @@ const PatternItem = forwardRef(
           />
           <div>
             <button onClick={() => handleEdit()}>
-              {editing ? "Confirm" : "Edit"}
+              {editing ? <FiCheck /> : <FiEdit />}
             </button>
             <button onClick={moveUp}>
               <FiChevronUp />
