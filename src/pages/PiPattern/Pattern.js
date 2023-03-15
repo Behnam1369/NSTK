@@ -74,6 +74,7 @@ export default function PiPattern() {
   const [idpipattern, setIdpipattern] = useState(useParams().idpipattern);
   const [searchParams] = useSearchParams();
   const tabno = searchParams.get("tabno");
+  const [thirdParty, setThirdParty] = useState(1);
 
   const [items, setItems] = useState([
     {
@@ -83,8 +84,6 @@ export default function PiPattern() {
       text: "2 + 2 = 4 is it correct 6 ",
     },
   ]);
-
-  console.log(items);
 
   useEffect(() => {
     if (!idpipattern)
@@ -106,6 +105,7 @@ export default function PiPattern() {
               };
             })
           );
+          setThirdParty(JSON.parse(res.data.result[0].PiPattern)[0].ThirdParty);
         });
     };
     loadData();
@@ -122,7 +122,6 @@ export default function PiPattern() {
     setItems(newItems);
   };
 
-  console.log(items);
   const changeTitle = (id, e) => {
     const newItems = items.map((el) => {
       if (el.id === id) {
@@ -197,6 +196,7 @@ export default function PiPattern() {
         .post(`${host}/users/${1}/pi_pattern`, {
           VchType: pi.VchType,
           Title: title,
+          ThirdParty: thirdParty,
           pi_pattern_itms_attributes: items.map((el) => {
             return {
               Title: el.title,
@@ -221,6 +221,7 @@ export default function PiPattern() {
         .patch(`${host}/users/${1}/pi_pattern/${idpipattern}`, {
           VchType: pi.VchType,
           Title: title,
+          ThirdParty: thirdParty,
           pi_pattern_itms_attributes: items.map((el) => {
             return {
               Title: el.title,
@@ -253,16 +254,42 @@ export default function PiPattern() {
     ]);
   };
 
+  const handleThirdPartyChange = (e) => {
+    setThirdParty(e.target.value);
+  };
+  console.log(`third party: `, thirdParty);
   return (
     <div className={style.main}>
       <div>
-        <input
-          type="text"
-          className={style.title}
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-        />
+        <div>
+          <input
+            type="text"
+            className={style.title}
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+          />
 
+          <div>
+            <label className={thirdParty == 0 ? style.selected : ""}>
+              <input
+                type="radio"
+                value="0"
+                name="thirdParty"
+                onChange={(e) => handleThirdPartyChange(e)}
+              />
+              SPII
+            </label>
+            <label className={thirdParty == 1 ? style.selected : ""}>
+              <input
+                type="radio"
+                value="1"
+                name="thirdParty"
+                onChange={(e) => handleThirdPartyChange(e)}
+              />
+              Third Party
+            </label>
+          </div>
+        </div>
         {items.map((el, i) => (
           <PatternItem
             key={el.id}

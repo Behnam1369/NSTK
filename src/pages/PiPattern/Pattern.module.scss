@@ -7,20 +7,58 @@
   width: 100%;
   box-sizing: border-box;
 
-  .title {
-    border: none;
-    font-size: 28px;
-    outline: none;
-    padding: 10px;
-    background-color: transparent;
-  }
-
   > div:nth-child(1) {
     padding: 10px;
     box-sizing: border-box;
 
     .saveButton {
       margin-top: 30px;
+    }
+
+    > div:nth-child(1) {
+      display: flex;
+      gap: 10px;
+
+      .title {
+        border: none;
+        font-size: 26px;
+        outline: none;
+        padding: 10px;
+        background-color: transparent;
+        flex: 100%;
+      }
+
+      > div {
+        flex: 140px;
+        display: flex;
+        gap: 0px;
+        align-items: center;
+        justify-content: space-around;
+
+        label {
+          border: solid 1px $main-color;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          padding: 5px;
+          height: 20px;
+          border-radius: 5px;
+          cursor: pointer;
+          font-family: Helvetica, sans-serif;
+          &:hover {
+            background-color: #c7bbdb;
+          }
+
+          input {
+            display: none;
+          }
+        }
+
+        label.selected {
+          background-color: #2249b5;
+          color: white;
+        }
+      }
     }
   }
 
@@ -56,14 +94,14 @@
         list-style: none;
         padding: 5px;
         border-radius: 5px;
-        background-color: #401786;
+        background-color: $main-color;
         color: white;
         margin: 5px;
         width: 100%;
         box-sizing: border-box;
 
         &:hover {
-          background-color: #6034ac;
+          background-color: #4664b7;
         }
       }
     }
