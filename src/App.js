@@ -57,7 +57,19 @@ function App() {
               element={<PiPattern />}
             />
             <Route
+              path="/users/:iduser/pi/:idpi/pi_pattern/:idpipattern/duplicate"
+              element={<PiPattern />}
+            />
+            <Route
               path="/users/:iduser/pi/:idpi/pi_pattern/:idpipattern"
+              element={<PiPattern />}
+            />
+            <Route
+              path="/users/:iduser/pi/:idpi/pi_pattern/:idpipattern/pi_print/new"
+              element={<PiPattern />}
+            />
+            <Route
+              path="/users/:iduser/pi/:idpi/pi_pattern/:idpipattern/pi_print/:idpiprint"
               element={<PiPattern />}
             />
             <Route path="*" element={<h1>404</h1>} />
