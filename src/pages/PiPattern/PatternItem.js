@@ -8,7 +8,13 @@ import {
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import style from "./PatternItem.module.scss";
-import { FiChevronUp, FiChevronDown, FiEdit, FiCheck } from "react-icons/fi";
+import {
+  FiChevronUp,
+  FiChevronDown,
+  FiEdit,
+  FiCheck,
+  FiTrash,
+} from "react-icons/fi";
 
 const PatternItem = forwardRef(
   (
@@ -22,6 +28,7 @@ const PatternItem = forwardRef(
       onEdit,
       moveUp,
       moveDown,
+      removeItem,
       changeType,
       index,
     },
@@ -100,6 +107,9 @@ const PatternItem = forwardRef(
             <button onClick={moveDown}>
               <FiChevronDown />
             </button>
+            <button onClick={removeItem}>
+              <FiTrash />
+            </button>
             <select onChange={(e) => changeType(e.target.value)}>
               <option>Normal</option>
               <option>Price</option>
@@ -122,7 +132,7 @@ const PatternItem = forwardRef(
             dangerouslySetInnerHTML={{ __html: evalFormula }}
           />
         )}
-        <div class={style.add}>
+        <div className={style.add}>
           <button onClick={(e) => handleAdd(e)}>Add Item ({index + 2}) </button>
         </div>
       </div>
