@@ -4,7 +4,7 @@ import style from "./Pattern.module.scss";
 import { host } from "../../Utils/host";
 import { useParams, useSearchParams } from "react-router-dom";
 import axios from "axios";
-import { IoSaveOutline } from "react-icons/io5";
+import { IoPrint, IoSaveOutline } from "react-icons/io5";
 import Message from "../../components/Message";
 
 const defaultPi = {
@@ -72,27 +72,25 @@ export default function PiPattern() {
 
   let { iduser, idpi } = useParams();
   const [idpipattern, setIdpipattern] = useState(useParams().idpipattern);
+  const [idpiprint, setIdpiprint] = useState(useParams().idpiprint);
   const [searchParams] = useSearchParams();
   const tabno = searchParams.get("tabno");
   const [thirdParty, setThirdParty] = useState(1);
 
   const [items, setItems] = useState([
     {
-      id: new Date().getTime(),
-      title: "Reference",
-      formula: "2 + 2 = {2 + 2} is it correct {1+5} ",
-      text: "2 + 2 = 4 is it correct 6 ",
+      id: 0,
+      title: "title",
+      formula: "{2+2}",
+      text: "4",
     },
   ]);
 
   useEffect(() => {
-    if (!idpipattern)
-      window.parent.postMessage({ title: "loaded", tabno }, "*");
-    const loadData = async () => {
+    const loadPiPattern = async () => {
       await axios
         .get(`${host}/users/${iduser}/pi/${idpi}/pi_pattern/${idpipattern}`)
         .then((res) => {
-          // console.log(JSON.parse(res.data.result[0].PiPatternItm));
           setPi(JSON.parse(res.data.result[0].Pi)[0]);
           setTitle(JSON.parse(res.data.result[0].PiPattern)[0].Title);
           setItems(
@@ -106,9 +104,41 @@ export default function PiPattern() {
             })
           );
           setThirdParty(JSON.parse(res.data.result[0].PiPattern)[0].ThirdParty);
+          if (window.location.pathname.split("/").includes("duplicate")) {
+            setIdpipattern(null);
+          }
         });
     };
-    loadData();
+
+    const loadPiPrint = async () => {
+      await axios
+        .get(`${host}/users/${iduser}/pi_print/${idpiprint}`)
+        .then((res) => {
+          setPi(JSON.parse(res.data.result[0].Pi)[0]);
+          setTitle(JSON.parse(res.data.result[0].PiPattern)[0].Title);
+          setItems(
+            JSON.parse(res.data.result[0].PiPatternItm).map((el) => {
+              return {
+                id: el.IdPiPrintItm,
+                title: el.Title,
+                formula: el.Formula,
+                text: el.Text,
+              };
+            })
+          );
+          setThirdParty(JSON.parse(res.data.result[0].PiPattern)[0].ThirdParty);
+        });
+    };
+
+    if (!window.location.pathname.split("/").includes("pi_print"))
+      loadPiPattern();
+    if (window.location.pathname.split("/").includes("pi_print")) {
+      if (idpiprint) {
+        loadPiPrint();
+      } else {
+        loadPiPattern();
+      }
+    }
     window.parent.postMessage({ title: "loaded", tabno }, "*");
   }, []);
 
@@ -186,12 +216,17 @@ export default function PiPattern() {
       ]);
   };
 
+  const removeItem = (id) => {
+    setItems(items.filter((el) => el.id !== id));
+  };
+
   const [saving, setSaving] = useState(false);
 
   const handleSave = async (e) => {
     e.preventDefault();
     setSaving(true);
     if (!idpipattern) {
+      // Create new PiPattern
       await axios
         .post(`${host}/users/${1}/pi_pattern`, {
           VchType: pi.VchType,
@@ -217,29 +252,84 @@ export default function PiPattern() {
           setMessageText("خطا در ثبت اطلاعات");
         });
     } else {
-      await axios
-        .patch(`${host}/users/${1}/pi_pattern/${idpipattern}`, {
-          VchType: pi.VchType,
-          Title: title,
-          ThirdParty: thirdParty,
-          pi_pattern_itms_attributes: items.map((el) => {
-            return {
-              Title: el.title,
-              Formula: el.formula,
-              Text: el.text,
-              Type: el.type,
-            };
-          }),
-        })
-        .then((res) => {
-          setSaving(false);
-          setIdpipattern(res.data.data.IdPiPattern);
-          setMessageText("اطلاعات با موفقیت ذخیره شد");
-        })
-        .catch((err) => {
-          setSaving(false);
-          setMessageText("خطا در ثبت اطلاعات");
-        });
+      // Update PiPattern
+      if (!window.location.pathname.split("/").includes("pi_print")) {
+        await axios
+          .patch(`${host}/users/${1}/pi_pattern/${idpipattern}`, {
+            VchType: pi.VchType,
+            Title: title,
+            ThirdParty: thirdParty,
+            pi_pattern_itms_attributes: items.map((el) => {
+              return {
+                Title: el.title,
+                Formula: el.formula,
+                Text: el.text,
+                Type: el.type,
+              };
+            }),
+          })
+          .then((res) => {
+            setSaving(false);
+            setIdpipattern(res.data.data.IdPiPattern);
+            setMessageText("اطلاعات با موفقیت ذخیره شد");
+          })
+          .catch((err) => {
+            setSaving(false);
+            setMessageText("خطا در ثبت اطلاعات");
+          });
+      } else {
+        // Craete new PiPrint
+        if (!idpiprint) {
+          await axios
+            .post(`${host}/users/${1}/pi_print`, {
+              IdPi: idpi,
+              IdPiPattern: idpipattern,
+              pi_print_itms_attributes: items.map((el) => {
+                return {
+                  Title: el.title,
+                  Formula: el.formula,
+                  Text: el.text,
+                  Type: el.type,
+                };
+              }),
+            })
+            .then((res) => {
+              setSaving(false);
+              setIdpiprint(res.data.data.IdPiPrint);
+              setMessageText("اطلاعات با موفقیت ذخیره شد");
+            })
+            .catch((err) => {
+              console.log(err);
+              setSaving(false);
+              setMessageText("خطا در ثبت اطلاعات");
+            });
+        } else {
+          // Update PiPrint
+          await axios
+            .patch(`${host}/users/${1}/pi_print/${idpiprint}`, {
+              IdPi: idpi,
+              IdPiPattern: idpipattern,
+              pi_print_itms_attributes: items.map((el) => {
+                return {
+                  Title: el.title,
+                  Formula: el.formula,
+                  Text: el.text,
+                  Type: el.type,
+                };
+              }),
+            })
+            .then((res) => {
+              setSaving(false);
+              setIdpiprint(res.data.data.IdPiPrint);
+              setMessageText("اطلاعات با موفقیت ذخیره شد");
+            })
+            .catch((err) => {
+              console.log(err);
+              setSaving(false);
+              setMessageText("خطا در ثبت اطلاعات");
+            });
+        }
+      }
     }
   };
 
@@ -255,22 +345,44 @@ export default function PiPattern() {
   };
 
   const handleThirdPartyChange = (e) => {
-    setThirdParty(e.target.value);
+    if (!window.location.pathname.split("/").includes("pi_print"))
+      setThirdParty(e.target.value);
   };
-  console.log(`third party: `, thirdParty);
+
+  const handlePrint = (e) => {
+    e.preventDefault();
+    window.parent.postMessage(
+      {
+        title: "print",
+        endpoint: "PrintPiPrint",
+        args: { idpiprint, pino: pi.PiNo },
+        tabTitle: `چاپ قرارداد فروش ${pi.PiNo}`,
+        tabno,
+      },
+      "*"
+    );
+  };
+
   return (
     <div className={style.main}>
       <div>
         <div>
           <input
             type="text"
+            readOnly={window.location.pathname.split("/").includes("pi_print")}
             className={style.title}
             value={title}
             onChange={(e) => setTitle(e.target.value)}
           />
 
           <div>
-            <label className={thirdParty == 0 ? style.selected : ""}>
+            <label
+              className={`${thirdParty == 0 ? style.selected : ""} ${
+                window.location.pathname.split("/").includes("pi_print")
+                  ? style.disabled
+                  : ""
+              }`}
+            >
               <input
                 type="radio"
                 value="0"
@@ -279,7 +391,13 @@ export default function PiPattern() {
               />
               SPII
             </label>
-            <label className={thirdParty == 1 ? style.selected : ""}>
+            <label
+              className={`${thirdParty == 1 ? style.selected : ""} ${
+                window.location.pathname.split("/").includes("pi_print")
+                  ? style.disabled
+                  : ""
+              }`}
+            >
               <input
                 type="radio"
                 value="1"
@@ -305,19 +423,30 @@ export default function PiPattern() {
             ref={el.id === editingItem ? editingRef : null}
             moveUp={() => moveUp(i)}
             moveDown={() => moveDown(i)}
+            removeItem={() => removeItem(el.id)}
             changeType={(type) => changeType(el.id, type)}
             index={i}
           />
         ))}
-        <div>
+        <div className={style.footer}>
           <button
-            className={`${style.formButton} ${style.saveButton}`}
+            className={style.formButton}
             disabled={saving}
             onClick={(e) => handleSave(e)}
           >
             <IoSaveOutline />
             <span>{saving ? "درحال ذخیره" : "ذخیره"}</span>
           </button>
+          {idpiprint && (
+            <button
+              className={`${style.formButton} ${style.printButton}`}
+              disabled={saving}
+              onClick={(e) => handlePrint(e)}
+            >
+              <IoPrint />
+              <span>چاپ</span>
+            </button>
+          )}
         </div>
       </div>
       <div>
@@ -335,7 +464,7 @@ export default function PiPattern() {
             .map((el) => (
               <li
                 key={el}
-                title={pi[el]}
+                title={(pi[el] || "").toString()}
                 className={style.field}
                 onClick={(e) => handleInsertExpression("pi." + el, e)}
               >
