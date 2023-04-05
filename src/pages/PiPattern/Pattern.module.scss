@@ -11,10 +11,6 @@
     padding: 10px;
     box-sizing: border-box;
 
-    .saveButton {
-      margin-top: 30px;
-    }
-
     > div:nth-child(1) {
       display: flex;
       gap: 10px;
@@ -43,15 +39,16 @@
           padding: 5px;
           height: 20px;
           border-radius: 5px;
-          cursor: pointer;
           font-family: Helvetica, sans-serif;
-          &:hover {
-            background-color: #c7bbdb;
-          }
 
           input {
             display: none;
           }
+        }
+
+        label:not(.disabled):not(.selected):hover {
+          background-color: #c7bbdb;
+          cursor: pointer;
         }
 
         label.selected {
@@ -105,5 +102,12 @@
         }
       }
     }
+  }
+
+  .footer {
+    display: flex;
+    gap: 10px;
+    padding: 30px 0;
+    justify-content: flex-start;
   }
 }
