@@ -1,6 +1,5 @@
 import { thousandSep } from "../../Utils/public";
 import style from "./Payment.module.scss";
-import Rates from "./Rates";
 
 export default function Payment({ data }) {
   return (
