@@ -6,6 +6,7 @@ import MissionReports from "./pages/Mission/MissionReports";
 import PiPattern from "./pages/PiPattern/Pattern";
 import PR from "./pages/PR/PR";
 import PurchaseRequest from "./pages/PurchaseRequest/PurchaseRequest";
+import SOA from "./pages/SOA";
 export const AppContext = React.createContext();
 
 function App() {
@@ -72,6 +73,7 @@ function App() {
               path="/users/:iduser/pi/:idpi/pi_pattern/:idpipattern/pi_print/:idpiprint"
               element={<PiPattern />}
             />
+            <Route path="/users/:iduser/pi/:idpi/soa" element={<SOA />} />
             <Route path="*" element={<h1>404</h1>} />
           </Routes>
         </BrowserRouter>
