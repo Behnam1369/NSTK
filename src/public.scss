@@ -44,6 +44,11 @@ body {
   src: url("../public/fonts/Yekan.ttf");
 }
 
+@font-face {
+  font-family: Volte;
+  src: url("../public/fonts/Volte.ttf");
+}
+
 @mixin buttonContainer {
   color: #e6e6ef;
   height: 40px;
