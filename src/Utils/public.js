@@ -13,10 +13,11 @@ export function fileSize(file) {
 }
 
 export const thousandSep = (num) => {
-  if (!num) {
+  if (num == 0) {
+    return 0;
+  } else if (!num) {
     return "";
-  }
-  if (num >= 0) {
+  } else if (num > 0) {
     let parts = num
       .toString()
       .replace(/[^0-9.]/g, "")
