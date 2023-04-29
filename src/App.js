@@ -7,6 +7,8 @@ import PiPattern from "./pages/PiPattern/Pattern";
 import PR from "./pages/PR/PR";
 import PurchaseRequest from "./pages/PurchaseRequest/PurchaseRequest";
 import SOA from "./pages/SOA";
+import SurveyList from "./pages/Survey/SurveyList";
+import Survey from "./pages/Survey";
 export const AppContext = React.createContext();
 
 function App() {
@@ -74,6 +76,11 @@ function App() {
               element={<PiPattern />}
             />
             <Route path="/users/:iduser/pi/:idpi/soa" element={<SOA />} />
+            <Route path="/users/:iduser/Survey" element={<SurveyList />} />
+            <Route
+              path="/users/:iduser/Survey/:idsurvey"
+              element={<Survey />}
+            />
             <Route path="*" element={<h1>404</h1>} />
           </Routes>
         </BrowserRouter>
