@@ -9,16 +9,32 @@ export default function Survey() {
   const { iduser, idsurvey } = useParams();
   const [survey, setSurvey] = useState(null);
   const [expired, setExpired] = useState(false);
+  const [answered, setAnswered] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [messageText, setMessageText] = useState(false);
   const [saving, setSaving] = useState(false);
   const [result, setResult] = useState(null);
 
+  const [searchParams] = useSearchParams();
+  const tabno = searchParams.get("tabno");
+
   useEffect(() => {
     const loadData = async () => {
       await fetch(`${host}/users/${iduser}/survey/${idsurvey}`)
         .then((res) => res.json())
-        .then((res) => setSurvey(res.data));
+        .then((res) => {
+          let data = JSON.parse(res.data[0].data);
+          let answered = false;
+          data.survey_questions.forEach((question) => {
+            question.survey_question_options.forEach((option) => {
+              if (option.Selected == "true") answered = true;
+            });
+          });
+
+          setAnswered(answered);
+          return setSurvey(data);
+        });
+      window.parent.postMessage({ title: "loaded", tabno }, "*");
     };
 
     loadData();
@@ -31,9 +47,6 @@ export default function Survey() {
       }
     }
   }, [survey]);
-
-  const [searchParams] = useSearchParams();
-  const tabno = searchParams.get("tabno");
 
   useEffect(() => {
     const loadVotes = async () => {
@@ -65,7 +78,7 @@ export default function Survey() {
   };
 
   const handleSelect = (idquestion, idoption) => {
-    if (!expired) {
+    if (!expired && !answered) {
       setSurvey({
         ...survey,
         survey_questions: survey.survey_questions.map((q) => {
@@ -74,9 +87,9 @@ export default function Survey() {
               ...q,
               survey_question_options: q.survey_question_options.map((o) => {
                 if (o.IdSurveyQuestionOption == idoption) {
-                  return { ...o, selected: true };
+                  return { ...o, Selected: "true" };
                 }
-                return { ...o, selected: false };
+                return { ...o, Selected: "false" };
               }),
             };
           }
@@ -92,7 +105,7 @@ export default function Survey() {
     const answers = [];
     survey.survey_questions.forEach((q) => {
       q.survey_question_options.forEach((o) => {
-        if (o.selected) {
+        if (o.Selected == "true") {
           answers.push({
             idsurveyquestion: q.IdSurveyQuestion,
             idsurveyquestionoption: o.IdSurveyQuestionOption,
@@ -132,7 +145,10 @@ export default function Survey() {
                       key={option.IdSurveyQuestionOption}
                       className={`${style.option} ${
                         expired ? style.expired : ""
-                      } ${option.selected ? style.selected : ""}`}
+                      } 
+                      ${option.Selected == "true" ? style.selected : ""}
+                      ${answered ? style.answered : ""}
+                      `}
                       onClick={() =>
                         handleSelect(
                           question.IdSurveyQuestion,
@@ -188,7 +204,7 @@ export default function Survey() {
                 </div>
               </div>
             ))}
-            {!expired && (
+            {!expired && !answered && (
               <button
                 onClick={(e) => handleSubmit(e)}
                 disabled={saving}
