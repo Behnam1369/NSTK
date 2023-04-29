@@ -38,13 +38,14 @@
       padding: 10px;
       margin: 10px;
 
-      &:not(.expired):hover {
+      &:not(.expired):not(.answered):not(.selected):hover {
         background-color: #eef0ff;
         cursor: pointer;
       }
 
       &.selected {
         font-weight: bold;
+        background-color: rgb(237, 255, 138);
         box-shadow: #aba9f9 3px 3px 3px, #aba9f9 -3px 3px 3px,
           #aba9f9 3px -3px 3px, #aba9f9 -3px -3px 3px;
       }
