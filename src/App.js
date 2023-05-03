@@ -10,6 +10,7 @@ import SOA from "./pages/SOA";
 import SurveyList from "./pages/Survey/SurveyList";
 import Survey from "./pages/Survey";
 import MarketReport from "./pages/MarketReport";
+import MarketReportsList from "./pages/MarketReport/MarketReportsList";
 export const AppContext = React.createContext();
 
 function App() {
@@ -83,9 +84,14 @@ function App() {
               element={<Survey />}
             />
             <Route
+              path="/users/:iduser/market_report"
+              element={<MarketReportsList />}
+            />
+            <Route
               path="/users/:iduser/market_report/:idmarketreport"
               element={<MarketReport />}
             />
+
             <Route path="*" element={<h1>404</h1>} />
           </Routes>
         </BrowserRouter>
