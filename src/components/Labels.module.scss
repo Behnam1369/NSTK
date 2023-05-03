@@ -1,0 +1,65 @@
+@import "../public.scss";
+
+.labels {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-bottom: 10px;
+  border: solid 1px $main-color;
+  padding: 5px;
+  border-radius: 8px;
+  min-height: 30px;
+  background-color: white;
+
+  .tag {
+    background-color: $c2;
+    color: white;
+    padding: 5px;
+    border-radius: 8px;
+    display: inline-flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+
+    svg {
+      font-size: 16px;
+      transition: 0.1s;
+      color: rgba(255, 255, 255, 0.833);
+      font-weight: bold;
+      &:hover {
+        cursor: pointer;
+        color: yellow;
+      }
+    }
+  }
+
+  .input {
+    font-family: inherit;
+    font-size: inherit;
+    padding: 1px 6px;
+    outline: none;
+    // display: flex;
+    // align-items: center;
+  }
+}
+
+.suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  align-items: center;
+  min-height: 32px;
+
+  .suggestion {
+    background-color: white;
+    color: $c2;
+    border: solid 1px $c2;
+    padding: 4px;
+    border-radius: 8px;
+
+    &:hover {
+      background-color: rgb(224, 223, 231);
+      cursor: pointer;
+    }
+  }
+}
