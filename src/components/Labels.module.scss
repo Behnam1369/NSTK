@@ -8,6 +8,8 @@
   border: solid 1px $main-color;
   padding: 5px;
   border-radius: 8px;
+  min-height: 30px;
+  background-color: white;
 
   .tag {
     background-color: $c2;
@@ -36,6 +38,8 @@
     font-size: inherit;
     padding: 1px 6px;
     outline: none;
+    // display: flex;
+    // align-items: center;
   }
 }
 
@@ -44,6 +48,7 @@
   flex-wrap: wrap;
   gap: 5px;
   align-items: center;
+  min-height: 32px;
 
   .suggestion {
     background-color: white;

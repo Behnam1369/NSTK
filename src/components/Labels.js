@@ -3,12 +3,22 @@ import style from "./Labels.module.scss";
 import { IoCloseOutline } from "react-icons/io5";
 
 export default function Labels(props) {
-  const [labels, setLabels] = useState(props.values || ["test"]);
+  const [labels, setLabels] = useState(
+    props.values ? props.values.split(",") : []
+  );
   const [suggestions, setSuggestions] = useState(props.suggestions || []);
 
   useEffect(() => {
     setSuggestions(props.suggestions || []);
   }, [props.suggestions]);
+
+  useEffect(() => {
+    props.onChange(labels.join(","));
+  }, [labels]);
+
+  useEffect(() => {
+    setLabels(props.values ? props.values.split(",") : []);
+  }, [props.values]);
 
   const input = useRef(null);
 
@@ -57,11 +67,10 @@ export default function Labels(props) {
         {labels.map((label) => (
           <span key={label} className={style.tag}>
             {label}
-            <IoCloseOutline onClick={() => handleRemove(label)} />
+            <IoCloseOutline onClick={(label) => handleRemove(label)} />
           </span>
         ))}
         <span
-          class="input"
           ref={input}
           className={style.input}
           contentEditable={true}
@@ -69,7 +78,7 @@ export default function Labels(props) {
           onKeyDown={(e) => handleKeyDown(e)}
         ></span>
       </div>
-      <div class={style.suggestions}>
+      <div className={style.suggestions}>
         <span>Suggested Items: </span>
         {suggestions
           .filter((suggestion) => !labels.includes(suggestion))
