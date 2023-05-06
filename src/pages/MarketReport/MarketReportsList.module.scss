@@ -41,6 +41,11 @@
       border-radius: 10px;
       background-color: white;
 
+      &:hover {
+        box-shadow: #bbbbbb 0px 4px 12px;
+        cursor: pointer;
+      }
+
       .markets {
         display: flex;
         flex-wrap: wrap;
@@ -50,7 +55,7 @@
 
         .market {
           list-style: none;
-          background-color: red;
+          background-color: rgb(251, 108, 108);
           color: white;
           border-radius: 5px;
           padding: 1px 3px 3px 3px;
@@ -73,7 +78,7 @@
 
         .product {
           list-style: none;
-          background-color: orangered;
+          background-color: rgb(255, 127, 81);
           color: white;
           border-radius: 5px;
           padding: 1px 3px 3px 3px;
