@@ -2,12 +2,14 @@ import { useEffect, useState } from "react";
 import style from "./MarketReportsList.module.scss";
 import axios from "axios";
 import { host } from "../../Utils/host";
-import { useParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 
 export default function MarketReportsList() {
   const [search, setSearch] = useState("");
   const [data, setData] = useState([]);
   const { iduser } = useParams();
+  const [searchParams] = useSearchParams();
+  const tabno = searchParams.get("tabno");
 
   const loadDate = async (searchText) => {
     searchText = searchText.replace(/ /g, "");
@@ -20,10 +22,18 @@ export default function MarketReportsList() {
 
   useEffect(() => {
     loadDate(search);
+    window.parent.postMessage({ title: "loaded", tabno }, "*");
   }, [iduser, search]);
 
-  const OpenReport = (id) => {
-    console.log(id);
+  const OpenReport = (id, title) => {
+    window.parent.postMessage(
+      {
+        title: "market_report",
+        args: { iduser, idmarketreport: id },
+        tabTitle: title,
+      },
+      "*"
+    );
   };
 
   const handleTagClick = (e, val) => {
@@ -48,7 +58,7 @@ export default function MarketReportsList() {
           <div
             key={card.IdMarketReport}
             className={style.card}
-            onClick={() => OpenReport(card.IdMarketReport)}
+            onClick={() => OpenReport(card.IdMarketReport, card.Title)}
           >
             <h3>{card.Title}</h3>
             <ul className={style.markets}>
