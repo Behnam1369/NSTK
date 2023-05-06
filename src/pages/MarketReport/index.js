@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { IoSaveOutline, IoTrashOutline } from "react-icons/io5";
-import { useParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import style from "./index.module.scss";
 import FormContainer from "../../components/FormContainer";
 import Labels from "../../components/Labels";
@@ -29,6 +29,8 @@ export default function MarketReport() {
   const [marketSuggestions, setMarketSuggestions] = useState([]);
   const [productSuggestions, setProductSuggestions] = useState([]);
   const [messageText, setMessageText] = useState(false);
+  const [searchParams] = useSearchParams();
+  const tabno = searchParams.get("tabno");
 
   const handleSave = (e) => {
     e.preventDefault();
@@ -124,6 +126,8 @@ export default function MarketReport() {
     if (idmarketreport > 0) {
       loadData();
     }
+
+    window.parent.postMessage({ title: "loaded", tabno }, "*");
   }, []);
 
   const setFiles = (val) => {
