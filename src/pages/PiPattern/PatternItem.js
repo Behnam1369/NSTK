@@ -40,7 +40,9 @@ const PatternItem = forwardRef(
 
     const evalFormula = formula.replace(/{([^}]+)}/g, (match, expression) => {
       try {
-        const result = eval(expression);
+        const result = eval(
+          expression.replace(/&gt;/g, ">").replace(/&lt;/g, "<")
+        );
         return result;
       } catch (error) {
         return expression;
