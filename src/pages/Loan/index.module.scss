@@ -1,0 +1,32 @@
+@import "../../public.scss";
+
+.loanTypes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+
+  .loanType {
+    border: solid 1px $main-color;
+    padding: 3px;
+    border-radius: 7px;
+    color: $main-color;
+    transition: 0.3s;
+    font-size: 13px;
+    font-family: IranSans;
+
+    &:hover {
+      background-color: rgba(0, 0, 255, 0.132);
+      cursor: pointer;
+    }
+  }
+
+  .loanType.selected {
+    background-color: $main-color;
+    color: whitesmoke;
+  }
+}
+
+.inputWrapper {
+  display: flex;
+  gap: 5px;
+}
