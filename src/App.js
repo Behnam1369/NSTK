@@ -11,6 +11,7 @@ import SurveyList from "./pages/Survey/SurveyList";
 import Survey from "./pages/Survey";
 import MarketReport from "./pages/MarketReport";
 import MarketReportsList from "./pages/MarketReport/MarketReportsList";
+import Loan from "./pages/Loan";
 export const AppContext = React.createContext();
 
 function App() {
@@ -91,7 +92,7 @@ function App() {
               path="/users/:iduser/market_report/:idmarketreport"
               element={<MarketReport />}
             />
-
+            <Route path="/users/:iduser/loan/new" element={<Loan />} />
             <Route path="*" element={<h1>404</h1>} />
           </Routes>
         </BrowserRouter>
