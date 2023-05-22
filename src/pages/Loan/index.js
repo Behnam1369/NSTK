@@ -68,23 +68,44 @@ export default function Loan() {
 
   useEffect(() => {
     const fetchData = async () => {
-      await fetch(`${host}/users/${iduser}/loan/new`)
-        .then((res) => res.json())
-        .then((res) => {
-          setLoanTypes(JSON.parse(res[0].data)[0].LoanTypes);
-          setSalary(JSON.parse(res[0].data)[0].GrossSalary);
-          setEmploymentMonth(JSON.parse(res[0].data)[0].EmploymentMonth);
-          setHierarchyLevel(JSON.parse(res[0].data)[0].HierarchyLevel);
-          setActiveMonthlyInstallments(
-            JSON.parse(res[0].data)[0].ActiveMonthlyInstallments
-          );
-          setFullName(JSON.parse(res[0].data)[0].FullName);
-          setLoan({
-            ...loan,
-            FullName: JSON.parse(res[0].data)[0].FullName,
-            PerNo: JSON.parse(res[0].data)[0].PerNo,
+      if (idloan) {
+        await fetch(`${host}/users/${iduser}/loan/${idloan}/edit`)
+          .then((res) => res.json())
+          .then((res) => {
+            let lt = JSON.parse(res[0].data)[0].LoanTypes;
+            let l = JSON.parse(JSON.parse(res[0].data)[0].Loan);
+            setLoan(l);
+            setLoanTypes(lt);
+            setSalary(JSON.parse(res[0].data)[0].GrossSalary);
+            setEmploymentMonth(JSON.parse(res[0].data)[0].EmploymentMonth);
+            setHierarchyLevel(JSON.parse(res[0].data)[0].HierarchyLevel);
+            setActiveMonthlyInstallments(
+              JSON.parse(res[0].data)[0].ActiveMonthlyInstallments
+            );
+            setFullName(JSON.parse(res[0].data)[0].FullName);
+            setMaxInstallment(
+              lt.find((el) => el.IdLoanType == l.IdLoanType).MaxInstallments
+            );
           });
-        });
+      } else {
+        await fetch(`${host}/users/${iduser}/loan/new`)
+          .then((res) => res.json())
+          .then((res) => {
+            setLoanTypes(JSON.parse(res[0].data)[0].LoanTypes);
+            setSalary(JSON.parse(res[0].data)[0].GrossSalary);
+            setEmploymentMonth(JSON.parse(res[0].data)[0].EmploymentMonth);
+            setHierarchyLevel(JSON.parse(res[0].data)[0].HierarchyLevel);
+            setActiveMonthlyInstallments(
+              JSON.parse(res[0].data)[0].ActiveMonthlyInstallments
+            );
+            setFullName(JSON.parse(res[0].data)[0].FullName);
+            setLoan({
+              ...loan,
+              FullName: JSON.parse(res[0].data)[0].FullName,
+              PerNo: JSON.parse(res[0].data)[0].PerNo,
+            });
+          });
+      }
     };
 
     fetchData();
@@ -113,7 +134,7 @@ export default function Loan() {
       setSaving(true);
       axios.post(`${host}/users/${iduser}/loan`, loan).then((res) => {
         setSaving(false);
-        setMessageText("اطلاعات با موفقیت ذخیره شد.");
+        setMessageText("اطلاعات با موفقیت ذخیره شد");
         setLoan(res.data.loan);
       });
     }
@@ -178,6 +199,107 @@ export default function Loan() {
     setLoan({ ...loan, Note: e.target.value });
   };
 
+  const handleUpdateManagerNote = (e) => {
+    setLoan({ ...loan, ManagerNote: e.target.value });
+  };
+
+  const handleUpdateHrNote = (e) => {
+    setLoan({ ...loan, HrNote: e.target.value });
+  };
+
+  const handleSendToDeptManager = (e) => {
+    e.preventDefault();
+    if (loan.IdLoan) {
+      setSaving(true);
+      axios
+        .patch(
+          `${host}/users/${iduser}/loan/${loan.IdLoan}/send_to_dept_manager`
+        )
+        .then((res) => {
+          setSaving(false);
+          setMessageText("اطلاعات با موفقیت ذخیره شد.");
+          setLoan(res.data.loan);
+        });
+    } else {
+      setMessageText("لطفاً ابتدا سند را ذخیره نمایید");
+    }
+  };
+
+  const handleSendToHr = (e) => {
+    e.preventDefault();
+    if (loan.IdLoan) {
+      setSaving(true);
+      axios
+        .patch(`${host}/users/${iduser}/loan/${loan.IdLoan}/send_to_hr`, {
+          Note: loan.ManagerNote,
+        })
+        .then((res) => {
+          setSaving(false);
+          setMessageText("اطلاعات با موفقیت ذخیره شد");
+          setLoan(res.data.loan);
+        });
+    } else {
+      setMessageText("لطفاً ابتدا سند را ذخیره نمایید");
+    }
+  };
+
+  const handleSendToCeo = (e) => {
+    e.preventDefault();
+    if (loan.IdLoan) {
+      setSaving(true);
+      axios
+        .patch(`${host}/users/${iduser}/loan/${loan.IdLoan}/send_to_ceo`, {
+          Note: loan.HrNote,
+        })
+        .then((res) => {
+          setSaving(false);
+          setMessageText("اطلاعات با موفقیت ذخیره شد");
+          setLoan(res.data.loan);
+        });
+    } else {
+      setMessageText("لطفاً ابتدا سند را ذخیره نمایید");
+    }
+  };
+
+  const rejectByDeptManager = (e) => {
+    e.preventDefault();
+    if (loan.IdLoan) {
+      setSaving(true);
+      axios
+        .patch(
+          `${host}/users/${iduser}/loan/${loan.IdLoan}/reject_by_dept_manager`,
+          {
+            Note: loan.ManagerNote,
+          }
+        )
+        .then((res) => {
+          setSaving(false);
+          setMessageText("اطلاعات با موفقیت ذخیره شد");
+          setLoan(res.data.loan);
+        });
+    } else {
+      setMessageText("لطفاً ابتدا سند را ذخیره نمایید");
+    }
+  };
+
+  const rejectByHr = (e) => {
+    e.preventDefault();
+    if (loan.IdLoan) {
+      setSaving(true);
+      axios
+        .patch(`${host}/users/${iduser}/loan/${loan.IdLoan}/reject_by_hr`, {
+          Note: loan.HrNote,
+        })
+        .then((res) => {
+          setSaving(false);
+          setMessageText("اطلاعات با موفقیت ذخیره شد");
+          setLoan(res.data.loan);
+        });
+    } else {
+      setMessageText("لطفاً ابتدا سند را ذخیره نمایید");
+    }
+  };
+
   return (
     <>
       <div className={`${style.operationButtons}`} dir="rtl">
@@ -190,24 +312,26 @@ export default function Loan() {
             <span>پیوست</span>
           </button>
         )}
-        <button
-          className={`${style.operationButton}`}
-          disabled={saving}
-          onClick={(e) => handleSave(e)}
-        >
-          <IoSaveOutline />
-          <span>{saving ? "درحال ذخیره" : "ذخیره"}</span>
-        </button>
-        {loan.Step == 1 && (
+        {loan.Step == 1 && loan.IdUser == iduser && (
           <button
             className={`${style.operationButton}`}
             disabled={saving}
             onClick={(e) => handleSave(e)}
           >
+            <IoSaveOutline />
+            <span>{saving ? "درحال ذخیره" : "ذخیره"}</span>
+          </button>
+        )}
+        {loan.Step == 1 && loan.IdUser == iduser && (
+          <button
+            className={`${style.operationButton}`}
+            disabled={saving}
+            onClick={(e) => handleSendToDeptManager(e)}
+          >
             <span>ارسال به مدیر واحد </span>
           </button>
         )}
-        {idloan && (
+        {idloan && loan.IdUser == iduser && (
           <button
             className={`${style.operationButton}`}
             disabled={deleting}
@@ -215,6 +339,42 @@ export default function Loan() {
           >
             <IoTrashOutline />
             <span>{deleting ? "درحال خذف" : "حذف"}</span>
+          </button>
+        )}
+        {loan.Step == 2 && loan.IdManager == iduser && (
+          <button
+            className={`${style.operationButton}`}
+            disabled={saving}
+            onClick={(e) => handleSendToHr(e)}
+          >
+            <span>تایید و ارسال به منابع انسانی</span>
+          </button>
+        )}
+        {loan.Step == 2 && loan.IdManager == iduser && (
+          <button
+            className={`${style.operationButton}`}
+            disabled={saving}
+            onClick={(e) => rejectByDeptManager(e)}
+          >
+            <span>عدم تایید</span>
+          </button>
+        )}
+        {loan.Step == 3 && loan.IdHr == iduser && (
+          <button
+            className={`${style.operationButton}`}
+            disabled={saving}
+            onClick={(e) => handleSendToCeo(e)}
+          >
+            <span>تایید و ارسال به مدیرعامل</span>
+          </button>
+        )}
+        {loan.Step == 3 && loan.IdHr == iduser && (
+          <button
+            className={`${style.operationButton}`}
+            disabled={saving}
+            onClick={(e) => rejectByHr(e)}
+          >
+            <span>عدم تایید</span>
           </button>
         )}
         {loan.Step >= 3 && (
@@ -252,9 +412,7 @@ export default function Loan() {
             <div
               key={lt.IdLoanType}
               className={`${style.loanType} ${
-                loanType && loanType.IdLoanType == lt.IdLoanType
-                  ? style.selected
-                  : ""
+                loan && loan.IdLoanType == lt.IdLoanType ? style.selected : ""
               }`}
               onClick={() => handleLoanSelect(lt.IdLoanType)}
             >
@@ -326,8 +484,39 @@ export default function Loan() {
           style={{ width: "100%", height: "100px" }}
           name="Note"
           onChange={(e) => handleUpdateNote(e)}
+          disabled={!(loan.Step == 1 && loan.IdManager == iduser)}
+        ></textarea>
+        <h1>مدیر واحد</h1>
+        <label>توضیحات</label>
+        <textarea
+          type="text"
+          className={style.txt}
+          value={loan && (loan.ManagerNote || "")}
+          style={{ width: "100%", height: "100px" }}
+          name="Note"
+          onChange={(e) => handleUpdateManagerNote(e)}
+          disabled={!(loan.Step == 2 && loan.IdManager == iduser)}
+        ></textarea>
+        <h1>مدیر منابع انسانی</h1>
+        <label>توضیحات</label>
+        <textarea
+          type="text"
+          className={style.txt}
+          value={loan && (loan.HrNote || "")}
+          style={{ width: "100%", height: "100px" }}
+          name="Note"
+          onChange={(e) => handleUpdateHrNote(e)}
+          disabled={!(loan.Step == 3 && loan.IdHr == iduser)}
         ></textarea>
       </FormContainer>
+      {messageText && (
+        <Message
+          text={messageText}
+          setShow={(result) => {
+            setMessageText(result);
+          }}
+        />
+      )}
     </>
   );
 }
