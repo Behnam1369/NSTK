@@ -93,6 +93,7 @@ function App() {
               element={<MarketReport />}
             />
             <Route path="/users/:iduser/loan/new" element={<Loan />} />
+            <Route path="/users/:iduser/loan/:idloan" element={<Loan />} />
             <Route path="*" element={<h1>404</h1>} />
           </Routes>
         </BrowserRouter>
