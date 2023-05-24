@@ -11,7 +11,7 @@ import {
 } from "react-icons/io5";
 import { IoIosCloseCircleOutline } from "react-icons/io";
 import Message from "../../components/Message";
-import { thousandSep } from "../../Utils/public";
+import { shamsiDate, thousandSep, today } from "../../Utils/public";
 import AmountInput from "../../components/AmountInput";
 import axios from "axios";
 let defaultLoan = {
@@ -21,7 +21,8 @@ let defaultLoan = {
   PerNo: null,
   IdLoanType: null,
   LoanType: null,
-  Step: 1,
+  IdStep: 1,
+  Step: "ثبت اولیه",
   State: 0,
   RequestDate: null,
   RequestDateShamsi: null,
@@ -42,6 +43,7 @@ let defaultLoan = {
   HrNote: null,
   HrConfirmDate: null,
   HrConfirmDateShamsi: null,
+  IdFin: "",
 };
 
 export default function Loan() {
@@ -55,6 +57,8 @@ export default function Loan() {
   const [employmentMonth, setEmploymentMonth] = useState(0);
   const [hierarchyLevel, setHierarchyLevel] = useState(0);
   const [activeMonthlyInstallments, setActiveMonthlyInstallments] = useState(0);
+  const [userGroups, setUserGroups] = useState([]);
+  const [roles, setRoles] = useState([]);
   const [messageText, setMessageText] = useState(false);
 
   const [saving, setSaving] = useState(false);
@@ -86,7 +90,10 @@ export default function Loan() {
             setMaxInstallment(
               lt.find((el) => el.IdLoanType == l.IdLoanType).MaxInstallments
             );
+            setRoles(JSON.parse(res[0].data)[0].Roles.split(","));
+            setUserGroups(JSON.parse(res[0].data)[0].UserGroups.split(","));
           });
+        window.parent.postMessage({ title: "loaded", tabno }, "*");
       } else {
         await fetch(`${host}/users/${iduser}/loan/new`)
           .then((res) => res.json())
@@ -105,11 +112,19 @@ export default function Loan() {
               PerNo: JSON.parse(res[0].data)[0].PerNo,
             });
           });
+        window.parent.postMessage({ title: "loaded", tabno }, "*");
       }
     };
 
     fetchData();
   }, []);
+
+  useEffect(() => {
+    if (!loan.InstallmentFirstMonth && loan.IdStep == 5) {
+      let ifm = shamsiDate(today).substring(0, 8);
+      installmentLastMonth(ifm);
+    }
+  }, [loan.IdStep, loan.InstallmentFirstMonth]);
 
   const handleAttachment = (e) => {
     e.preventDefault();
@@ -148,7 +163,7 @@ export default function Loan() {
       window.parent.postMessage(
         {
           title: "print",
-          endpoint: "PrintPr",
+          endpoint: "PrintLoan",
           args: { idloan },
           tabTitle: `چاپ درخواست وام ${loan.IdLoan}`,
           tabno,
@@ -170,7 +185,7 @@ export default function Loan() {
   };
 
   const handleLoanSelect = (id) => {
-    if (loan.Step != 1) return;
+    if (loan.IdStep != 1) return;
     let lt = loanTypes.find((el) => el.IdLoanType == id);
     setLoanType(lt);
     let max = eval(lt.MaxAmountFormula).toFixed(0);
@@ -205,6 +220,14 @@ export default function Loan() {
 
   const handleUpdateHrNote = (e) => {
     setLoan({ ...loan, HrNote: e.target.value });
+  };
+
+  const handleUpdateCeoNote = (e) => {
+    setLoan({ ...loan, CeoNote: e.target.value });
+  };
+
+  const handleUpdateFinNote = (e) => {
+    setLoan({ ...loan, FinNote: e.target.value });
   };
 
   const handleSendToDeptManager = (e) => {
@@ -300,6 +323,85 @@ export default function Loan() {
     }
   };
 
+  const handleSendToFinance = (e) => {
+    e.preventDefault();
+    setSaving(true);
+    axios
+      .patch(`${host}/users/${iduser}/loan/${loan.IdLoan}/send_to_finance`, {
+        Note: loan.HrNote,
+      })
+      .then((res) => {
+        setSaving(false);
+        setMessageText("اطلاعات با موفقیت ذخیره شد");
+        setLoan(res.data.loan);
+      });
+  };
+
+  const handleConfirmPayment = (e) => {
+    e.preventDefault();
+    setSaving(true);
+    axios
+      .patch(`${host}/users/${iduser}/loan/${loan.IdLoan}/confirm_payment`, {
+        Note: loan.FinNote,
+        InstallmentFirstMonth: loan.InstallmentFirstMonth,
+        InstallmentLastMonth: loan.InstallmentLastMonth,
+      })
+      .then((res) => {
+        setSaving(false);
+        setMessageText("اطلاعات با موفقیت ذخیره شد");
+        setLoan(res.data.loan);
+      });
+  };
+
+  const rejectByCeo = (e) => {
+    e.preventDefault();
+    setSaving(true);
+    axios
+      .patch(`${host}/users/${iduser}/loan/${loan.IdLoan}/reject_by_ceo`, {
+        Note: loan.HrNote,
+      })
+      .then((res) => {
+        setSaving(false);
+        setMessageText("اطلاعات با موفقیت ذخیره شد");
+        setLoan(res.data.loan);
+      });
+  };
+
+  const handleStartYearChange = (e) => {
+    let ifm =
+      e.target.value +
+      "/" +
+      (loan.InstallmentFirstMonth || shamsiDate(today).substring(0, 8)).split(
+        "/"
+      )[1];
+    installmentLastMonth(ifm);
+  };
+
+  const handleStartMonthChange = (e) => {
+    if (e.target.value > 12) return false;
+    let ifm =
+      (loan.InstallmentFirstMonth || shamsiDate(today).substring(0, 8)).split(
+        "/"
+      )[0] +
+      "/" +
+      e.target.value;
+    installmentLastMonth(ifm);
+  };
+
+  const installmentLastMonth = (ifm) => {
+    let y = parseInt(ifm.split("/")[0]);
+    let m = parseInt(ifm.split("/")[1]);
+    let qty = loan.Installments;
+    let newy = y + Math.floor(qty / 12) + (m + (qty % 12) - 1 > 12 ? 1 : 0);
+    let newm = (m + (qty % 12) - 1) % 12;
+    newm = newm == 0 ? 12 : newm;
+    setLoan({
+      ...loan,
+      InstallmentFirstMonth: ifm,
+      InstallmentLastMonth: newy + "/" + newm,
+    });
+  };
+
   return (
     <>
       <div className={`${style.operationButtons}`} dir="rtl">
@@ -312,7 +414,7 @@ export default function Loan() {
             <span>پیوست</span>
           </button>
         )}
-        {loan.Step == 1 && loan.IdUser == iduser && (
+        {loan.IdStep == 1 && loan.IdUser == iduser && (
           <button
             className={`${style.operationButton}`}
             disabled={saving}
@@ -322,7 +424,7 @@ export default function Loan() {
             <span>{saving ? "درحال ذخیره" : "ذخیره"}</span>
           </button>
         )}
-        {loan.Step == 1 && loan.IdUser == iduser && (
+        {loan.IdStep == 1 && loan.IdUser == iduser && (
           <button
             className={`${style.operationButton}`}
             disabled={saving}
@@ -338,10 +440,10 @@ export default function Loan() {
             onClick={(e) => handleDelete(e)}
           >
             <IoTrashOutline />
-            <span>{deleting ? "درحال خذف" : "حذف"}</span>
+            <span>{deleting ? "درحال حذف" : "حذف"}</span>
           </button>
         )}
-        {loan.Step == 2 && loan.IdManager == iduser && (
+        {loan.IdStep == 2 && loan.IdManager == iduser && (
           <button
             className={`${style.operationButton}`}
             disabled={saving}
@@ -350,7 +452,7 @@ export default function Loan() {
             <span>تایید و ارسال به منابع انسانی</span>
           </button>
         )}
-        {loan.Step == 2 && loan.IdManager == iduser && (
+        {loan.IdStep == 2 && loan.IdManager == iduser && (
           <button
             className={`${style.operationButton}`}
             disabled={saving}
@@ -359,7 +461,7 @@ export default function Loan() {
             <span>عدم تایید</span>
           </button>
         )}
-        {loan.Step == 3 && loan.IdHr == iduser && (
+        {loan.IdStep == 3 && loan.IdHr == iduser && (
           <button
             className={`${style.operationButton}`}
             disabled={saving}
@@ -368,7 +470,7 @@ export default function Loan() {
             <span>تایید و ارسال به مدیرعامل</span>
           </button>
         )}
-        {loan.Step == 3 && loan.IdHr == iduser && (
+        {loan.IdStep == 3 && loan.IdHr == iduser && (
           <button
             className={`${style.operationButton}`}
             disabled={saving}
@@ -377,7 +479,36 @@ export default function Loan() {
             <span>عدم تایید</span>
           </button>
         )}
-        {loan.Step >= 3 && (
+        {loan.IdStep == 4 &&
+          (roles.includes("6") || userGroups.includes("110")) && (
+            <button
+              className={`${style.operationButton}`}
+              disabled={saving}
+              onClick={(e) => handleSendToFinance(e)}
+            >
+              <span>تایید و ارسال به مالی</span>
+            </button>
+          )}
+        {loan.IdStep == 4 &&
+          (roles.includes("6") || userGroups.includes("110")) && (
+            <button
+              className={`${style.operationButton}`}
+              disabled={saving}
+              onClick={(e) => rejectByCeo(e)}
+            >
+              <span>عدم تایید</span>
+            </button>
+          )}
+        {loan.IdStep == 5 && loan.IdFin.split(",").includes(iduser) && (
+          <button
+            className={`${style.operationButton}`}
+            disabled={saving}
+            onClick={(e) => handleConfirmPayment(e)}
+          >
+            <span>تایید پرداخت</span>
+          </button>
+        )}
+        {loan.IdStep >= 3 && (
           <button
             className={`${style.operationButton}`}
             onClick={(e) => handlePrint(e)}
@@ -388,6 +519,159 @@ export default function Loan() {
         )}
       </div>
       <FormContainer dir="rtl">
+        {loan.IdStep > 4 && (
+          <>
+            <h1>مالی</h1>
+            {loan.Installments && (
+              <>
+                <label>دوره کسر اقساط</label>
+                <div>
+                  <span>از</span>
+                  <span dir="ltr">
+                    <input
+                      type="text"
+                      className={`${style.txt}`}
+                      style={{
+                        width: "50px",
+                        margin: "0 5px",
+                        textAlign: "center",
+                      }}
+                      value={
+                        (
+                          loan.InstallmentFirstMonth ||
+                          shamsiDate(today).substring(0, 8)
+                        ).split("/")[0]
+                      }
+                      placeholder="YYYY"
+                      maxLength={4}
+                      onChange={(e) => handleStartYearChange(e)}
+                      disabled={loan.IdStep > 5}
+                    />
+                    /
+                    <input
+                      type="text"
+                      className={`${style.txt}`}
+                      style={{
+                        width: "35px",
+                        margin: "0 5px",
+                        textAlign: "center",
+                      }}
+                      value={
+                        (
+                          loan.InstallmentFirstMonth ||
+                          shamsiDate(today).substring(0, 8)
+                        ).split("/")[1]
+                      }
+                      placeholder="MM"
+                      max={12}
+                      maxLength={2}
+                      onChange={(e) => handleStartMonthChange(e)}
+                      disabled={loan.IdStep > 5}
+                    />
+                  </span>
+                  <span style={{ marginRight: "50px" }}>تا</span>
+                  <span dir="ltr">
+                    <input
+                      type="text"
+                      disabled={true}
+                      className={`${style.txt}`}
+                      style={{
+                        width: "50px",
+                        margin: "0 5px",
+                        textAlign: "center",
+                      }}
+                      value={
+                        (
+                          loan.InstallmentLastMonth ||
+                          shamsiDate(today).substring(0, 8)
+                        ).split("/")[0]
+                      }
+                    />
+                    /
+                    <input
+                      type="text"
+                      disabled={true}
+                      className={`${style.txt}`}
+                      style={{
+                        width: "35px",
+                        margin: "0 5px",
+                        textAlign: "center",
+                      }}
+                      value={
+                        (
+                          loan.InstallmentLastMonth ||
+                          shamsiDate(today).substring(0, 8)
+                        ).split("/")[1]
+                      }
+                    />
+                  </span>
+                </div>
+              </>
+            )}
+            <label>توضیحات</label>
+            <textarea
+              type="text"
+              className={style.txt}
+              value={loan && (loan.FinNote || "")}
+              style={{ width: "100%", height: "100px" }}
+              name="Note"
+              onChange={(e) => handleUpdateFinNote(e)}
+              disabled={
+                !(loan.IdStep == 5 && loan.IdFin.split(",").includes(iduser))
+              }
+            ></textarea>
+          </>
+        )}
+        {loan.IdStep > 3 && (
+          <>
+            <h1>مدیر عامل</h1>
+            <label>توضیحات</label>
+            <textarea
+              type="text"
+              className={style.txt}
+              value={loan && (loan.CeoNote || "")}
+              style={{ width: "100%", height: "100px" }}
+              name="Note"
+              onChange={(e) => handleUpdateCeoNote(e)}
+              disabled={
+                !(
+                  loan.IdStep == 4 &&
+                  (roles.includes("6") || userGroups.includes("110"))
+                )
+              }
+            ></textarea>
+          </>
+        )}
+        {loan.IdStep > 2 && (
+          <>
+            <h1>مدیر منابع انسانی</h1>
+            <label>توضیحات</label>
+            <textarea
+              type="text"
+              className={style.txt}
+              value={loan && (loan.HrNote || "")}
+              style={{ width: "100%", height: "100px" }}
+              name="Note"
+              onChange={(e) => handleUpdateHrNote(e)}
+              disabled={!(loan.IdStep == 3 && loan.IdHr == iduser)}
+            ></textarea>
+          </>
+        )}
+        {loan.IdStep > 1 && (
+          <>
+            <h1>مدیر واحد</h1>
+            <label>توضیحات</label>
+            <textarea
+              type="text"
+              className={style.txt}
+              value={loan && (loan.ManagerNote || "")}
+              style={{ width: "100%", height: "100px" }}
+              name="Note"
+              onChange={(e) => handleUpdateManagerNote(e)}
+              disabled={!(loan.IdStep == 2 && loan.IdManager == iduser)}
+            ></textarea>
+          </>
+        )}
         <h1>درخواست وام</h1>
         <label>سریال</label>
         <span>{loan.IdLoan}</span>
@@ -427,7 +711,7 @@ export default function Loan() {
             onChange={(val) => handleAmountChange(val)}
             max={maxAmount}
             min={0}
-            disabled={loan.Step != 1}
+            disabled={loan.IdStep != 1}
           />
           <span>ریال</span>
         </div>
@@ -440,7 +724,7 @@ export default function Loan() {
                 onChange={(val) => handleInstallmentChange(val)}
                 max={maxInstallment}
                 min={0}
-                disabled={loan.Step != 1}
+                disabled={loan.IdStep != 1}
               />
             </div>
           </>
@@ -484,29 +768,12 @@ export default function Loan() {
           style={{ width: "100%", height: "100px" }}
           name="Note"
           onChange={(e) => handleUpdateNote(e)}
-          disabled={!(loan.Step == 1 && loan.IdManager == iduser)}
-        ></textarea>
-        <h1>مدیر واحد</h1>
-        <label>توضیحات</label>
-        <textarea
-          type="text"
-          className={style.txt}
-          value={loan && (loan.ManagerNote || "")}
-          style={{ width: "100%", height: "100px" }}
-          name="Note"
-          onChange={(e) => handleUpdateManagerNote(e)}
-          disabled={!(loan.Step == 2 && loan.IdManager == iduser)}
-        ></textarea>
-        <h1>مدیر منابع انسانی</h1>
-        <label>توضیحات</label>
-        <textarea
-          type="text"
-          className={style.txt}
-          value={loan && (loan.HrNote || "")}
-          style={{ width: "100%", height: "100px" }}
-          name="Note"
-          onChange={(e) => handleUpdateHrNote(e)}
-          disabled={!(loan.Step == 3 && loan.IdHr == iduser)}
+          disabled={
+            !(
+              loan.IdStep == 1 &&
+              (loan.IdUser == iduser || loan.IdUser == null)
+            )
+          }
         ></textarea>
       </FormContainer>
       {messageText && (
