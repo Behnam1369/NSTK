@@ -1,1 +1,5 @@
 @import "../public.scss";
+
+input[disabled] {
+  background-color: #d3d8ec;
+}

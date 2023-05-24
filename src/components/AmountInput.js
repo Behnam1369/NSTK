@@ -1,12 +1,16 @@
-import { useState } from "react";
 import style from "./AmountInput.module.scss";
 import proptypes from "prop-types";
 import { thousandSep, toNumber } from "../Utils/public";
 
 export default function AmountInput(props) {
-  const { width, value, onChange } = props;
+  const { width, value, onChange, max, min, disabled } = props;
 
   const handleChange = (num) => {
+    if (
+      parseFloat(num.replace(/,/g, "")) > parseFloat(max) ||
+      parseFloat(num.replace(/,/g, "")) < parseFloat(min)
+    )
+      return;
     onChange(toNumber(num));
   };
 
@@ -20,6 +24,7 @@ export default function AmountInput(props) {
         dir="ltr"
         style={{ width: width }}
         onChange={(e) => handleChange(e.target.value)}
+        disabled={disabled}
       />
     </div>
   );

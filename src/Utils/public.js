@@ -106,3 +106,5 @@ export const isNumeric = (str) => {
     !isNaN(parseFloat(str))
   ); // ...and ensure strings of whitespace fail
 };
+
+export const today = new Date().toISOString().slice(0, 10);
