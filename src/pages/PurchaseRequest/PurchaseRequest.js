@@ -20,6 +20,7 @@ import {
 } from "react-icons/io";
 import Message from "../../components/Message";
 import Selector from "../../components/Selector";
+import Timepicker from "../../components/Timepicker";
 
 const headLetterTypes = [
   { id: 1, title: "SPII" },
@@ -46,6 +47,10 @@ export default function PR() {
     Note: null,
     Issuer: null,
     State: null,
+    IdTradeSize: null,
+    SkipFormalities: false,
+    StartTime: "",
+    EndTime: "",
   };
   const [data, setData] = useState(defaultState);
 
@@ -61,6 +66,7 @@ export default function PR() {
   ];
 
   const [items, setItems] = useState(defaultItems);
+  const [inqueries, setInquiries] = useState([]);
 
   const [curArr, setCurArr] = useState([]);
   const setDate = (name, val) => {
@@ -70,6 +76,8 @@ export default function PR() {
   const [cancelling, setCancelling] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [messageText, setMessageText] = useState(false);
+  const [tradeSizes, setTradeSizes] = useState([]);
+  const [idTradeSize, setIdTradeSize] = useState(null);
 
   useEffect(() => {
     const loadData = async () => {
@@ -80,6 +88,8 @@ export default function PR() {
             setCurArr(res.data.data.curArr);
             setData(res.data.data.vch);
             setItems(res.data.data.itms);
+            setInquiries(res.data.data.inquiries);
+            setTradeSizes(res.data.data.tradeSize);
             window.parent.postMessage({ title: "loaded", tabno }, "*");
           });
       } else {
@@ -92,6 +102,7 @@ export default function PR() {
               IdDept: res.data.data.idDept,
               Dept: res.data.data.dept,
             });
+            setTradeSizes(res.data.data.tradeSize);
             window.parent.postMessage({ title: "loaded", tabno }, "*");
           });
       }
@@ -141,14 +152,15 @@ export default function PR() {
     }
 
     setSaving(true);
-    console.log({
-      ...data,
-      purchase_request_itms_attributes: items,
-    });
     await axios
       .post(`${host}/purchase_request`, {
         ...data,
+        IdTradeSize: data.IdTradeSize || idTradeSize,
+        TradeSize: tradeSizes.find(
+          (el) => el.IdTradeSize == (data.IdTradeSize || idTradeSize)
+        ).Title,
         purchase_request_itms_attributes: items,
+        purchase_request_inquiries_attributes: inqueries,
       })
       .then((res) => {
         setSaving(false);
@@ -223,6 +235,27 @@ export default function PR() {
     }
   };
 
+  const handlePrint2 = (e) => {
+    e.preventDefault();
+    if (data.IdPurchaseRequest) {
+      window.parent.postMessage(
+        {
+          title: "print",
+          endpoint: "PrintPurchaseRequestCommission",
+          args: {
+            idpurchaserequest: data.IdPurchaseRequest,
+            PurchaseRequestno: data.PurchaseRequestNo,
+          },
+          tabTitle: `چاپ صورتجلسه کمیسیون معاملات ${data.PurchaseRequestNo}`,
+          tabno,
+        },
+        "*"
+      );
+    } else {
+      setMessageText("ابتدا سند را ذخیره کنید");
+    }
+  };
+
   const handleAttachment = (e) => {
     e.preventDefault();
     if (idpurchaserequest) {
@@ -263,8 +296,180 @@ export default function PR() {
     setItems(items.filter((item) => item.IdPurchaseRequestItm !== id));
   };
 
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const getTradeSize = async (amount, abr) => {
+        await axios
+          .get(
+            `http://localhost:3000/purchase_request/get_trade_size?abr=${abr}&amount=${amount}`
+          )
+          .then((res) => {
+            setIdTradeSize(res.data.result);
+          });
+      };
+
+      if (data.Amount && data.Abr) {
+        getTradeSize(data.Amount, data.Abr);
+      } else {
+        setIdTradeSize(null);
+      }
+    }, 200);
+
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [data.Amount, data.Abr]);
+
+  const bigTradeStartInterval = () => {
+    return Math.max.apply(
+      Math,
+      tradeSizes
+        .filter((trade) => trade.Amount != null)
+        .map((trade) => trade.Amount)
+    );
+  };
+
+  const hasForeigncur = () => {
+    let result = false;
+    inqueries.forEach((inquiry) => {
+      if (inquiry.IdCur != 99) result = true;
+    });
+    return result;
+  };
+
+  const handleAddInquiry = () => {
+    setInquiries([
+      ...inqueries,
+      {
+        IdPurchaseRequestInquiry: new Date().getTime(),
+        IdPurchaseRequest: 16,
+        Title: "",
+        Amount: null,
+        IdCur: 99,
+        Cur: "IRR",
+        ExchangeRate: 1,
+        ExchangeRateRevert: 1,
+        IRRAmount: null,
+        Note: null,
+      },
+    ]);
+  };
+
+  const handleInquiryChange = (e, id) => {
+    const { name, value } = e.target;
+    setInquiries(
+      inqueries.map((inquiry) => {
+        if (inquiry.IdPurchaseRequestInquiry == id) {
+          return { ...inquiry, [name]: value };
+        }
+        return inquiry;
+      })
+    );
+  };
+
+  const handleInquiryCurChange = (idcur, id) => {
+    setInquiries(
+      inqueries.map((inquiry) => {
+        if (inquiry.IdPurchaseRequestInquiry == id) {
+          return {
+            ...inquiry,
+            IdCur: idcur,
+            Cur: curArr.find((cur) => cur.IdCur == idcur).Abr,
+          };
+        }
+        return inquiry;
+      })
+    );
+  };
+
+  const handleInquiryRemove = (id) => {
+    setInquiries(
+      inqueries.filter((inquery) => inquery.IdPurchaseRequestInquiry != id)
+    );
+  };
+
+  const handleInquiryAmountChange = (id, val) => {
+    setInquiries(
+      inqueries.map((inquiry) => {
+        if (inquiry.IdPurchaseRequestInquiry == id) {
+          return {
+            ...inquiry,
+            Amount: val,
+            IRRAmount:
+              val > 0 && inquiry.ExchangeRate > 0
+                ? val * inquiry.ExchangeRate
+                : "",
+          };
+        }
+        return inquiry;
+      })
+    );
+  };
+
+  const handleInquiryExchangeRateChange = (id, val) => {
+    setInquiries(
+      inqueries.map((inquiry) => {
+        if (inquiry.IdPurchaseRequestInquiry == id) {
+          if (inquiry.IdCur == 99) {
+            return {
+              ...inquiry,
+              ExchangeRate: 1,
+              ExchangeRateRevert: 1,
+              IRRAmount: inquiry.Amount,
+            };
+          } else {
+            return {
+              ...inquiry,
+              ExchangeRate: val > 0 ? val : "",
+              ExchangeRateRevert: val > 0 ? 1 / val : 1,
+              IRRAmount:
+                val > 0 && inquiry.Amount > 0 ? val * inquiry.Amount : "",
+            };
+          }
+        }
+        return inquiry;
+      })
+    );
+  };
+
+  const handleInquiryExchangeRateRevertChange = (id, val) => {
+    setInquiries(
+      inqueries.map((inquiry) => {
+        if (inquiry.IdPurchaseRequestInquiry == id) {
+          console.log(inquiry.IdCur);
+          if (inquiry.IdCur == 99) {
+            return {
+              ...inquiry,
+              ExchangeRate: 1,
+              ExchangeRateRevert: 1,
+              IRRAmount: inquiry.Amount,
+            };
+          } else {
+            return {
+              ...inquiry,
+              ExchangeRate: val > 0 ? 1 / val : "",
+              ExchangeRateRevert: val > 0 ? val : 1,
+              IRRAmount:
+                val > 0 && inquiry.Amount > 0 ? (1 / val) * inquiry.Amount : "",
+            };
+          }
+        }
+        return inquiry;
+      })
+    );
+  };
+
+  const toggleSkipFormalities = () => {
+    setData({ ...data, SkipFormalities: data.SkipFormalities ? 0 : 1 });
+    setInquiries([]);
+  };
+
+  const setTime = (name, val) => {
+    setData({ ...data, [name]: val });
+  };
+
   return (
-    <div>
+    <div className={style.main}>
       <div className={`${style.operationButtons}`} dir="rtl">
         <button
           className={`${style.operationButton}`}
@@ -302,10 +507,19 @@ export default function PR() {
           onClick={(e) => handlePrint(e)}
         >
           <IoPrintOutline />
-          <span>چاپ</span>
+          <span>چاپ درخواست خرید</span>
         </button>
+        {data.IdTradeSize > 2 && (
+          <button
+            className={`${style.operationButton}`}
+            onClick={(e) => handlePrint2(e)}
+          >
+            <IoPrintOutline />
+            <span>چاپ صورتجلسه کمیسیون معاملات</span>
+          </button>
+        )}
       </div>
-      <FormContainer dir="rtl">
+      <FormContainer dir="rtl" style={{ maxWidth: "1000px" }}>
         <h1>درخواست خرید کالا / خدمات</h1>
         {data.State == 1 && <h2 className={style.cancelled}>ابطال شده</h2>}
         <label>سریال</label>
@@ -405,6 +619,25 @@ export default function PR() {
           value={data.IdCur}
           fontFamily={"IranSansLight"}
         />
+        <label>اندازه معامله</label>
+        <div className={style.tradeSizes}>
+          {tradeSizes.map((trade) => (
+            <div
+              key={trade.IdTradeSize}
+              className={`
+              ${style.tradeSize} 
+              ${trade.IdTradeSize == idTradeSize ? style.calculated : ""}  
+              ${trade.IdTradeSize == data.IdTradeSize ? style.saved : ""} `}
+              title={
+                trade.Amount == null
+                  ? `بیش از ${thousandSep(bigTradeStartInterval())}`
+                  : `تا ${thousandSep(trade.Amount)}  ریال`
+              }
+            >
+              {trade.Title}
+            </div>
+          ))}
+        </div>
         <label>توضیحات</label>
         <textarea
           type="text"
@@ -414,6 +647,342 @@ export default function PR() {
           name="Note"
           onChange={(e) => handleUpdate(e)}
         ></textarea>
+        <label>ترک تشریفات</label>
+        <div>
+          <input
+            type="checkbox"
+            checked={data.SkipFormalities}
+            onChange={() => toggleSkipFormalities()}
+          />
+        </div>
+        {data.SkipFormalities == true && (
+          <>
+            <label>گزارش ترک تشریفات</label>
+            <textarea
+              type="text"
+              className={style.txt}
+              value={data.SkipFormalitiesNote || ""}
+              style={{ width: "100%", height: "150px" }}
+              name="SkipFormalitiesNote"
+              onChange={(e) => handleUpdate(e)}
+            ></textarea>
+          </>
+        )}
+        {(idTradeSize > 2 || data.IdTradeSize > 2) &&
+          data.SkipFormalities == false && (
+            <>
+              <h1>استعلام ها</h1>
+              <div className={`${style.grid} ${style.grid2}`}>
+                <div>
+                  <div className={style.header} style={{ width: "250px" }}>
+                    شخص / شرکت
+                  </div>
+                  <div className={style.header} style={{ width: "120px" }}>
+                    مبلغ
+                  </div>
+                  <div className={style.header} style={{ width: "80px" }}>
+                    ارز
+                  </div>
+                  {hasForeigncur() && (
+                    <>
+                      <div className={style.header} style={{ width: "90px" }}>
+                        نرخ ارز
+                      </div>
+                      <div className={style.header} style={{ width: "100px" }}>
+                        نرخ ارز معکوس
+                      </div>
+                      <div className={style.header} style={{ width: "100px" }}>
+                        مبلغ به ریال
+                      </div>
+                    </>
+                  )}
+                  <div className={style.header} style={{ width: "150px" }}>
+                    توضیحات
+                  </div>
+                  <IoIosAddCircle
+                    className={style.btnAdd}
+                    onClick={() => handleAddInquiry()}
+                  />
+                </div>
+              </div>
+              {inqueries.map((inquiry) => (
+                <div
+                  key={inquiry.IdPurchaseRequestInquiry}
+                  className={` ${style.grid2} ${style.inquiry}`}
+                >
+                  <input
+                    type="text"
+                    className={style.txt}
+                    value={inquiry.Title || ""}
+                    name="Title"
+                    onChange={(e) =>
+                      handleInquiryChange(e, inquiry.IdPurchaseRequestInquiry)
+                    }
+                    style={{ width: "260px", height: "30px" }}
+                  />
+                  <AmountInput
+                    value={inquiry.Amount || ""}
+                    name="Amount"
+                    onChange={(val) =>
+                      handleInquiryAmountChange(
+                        inquiry.IdPurchaseRequestInquiry,
+                        val
+                      )
+                    }
+                    width="130px"
+                    style={{ height: "30px" }}
+                  />
+                  <Selector
+                    data={curArr}
+                    id="IdCur"
+                    title="Abr"
+                    width={90}
+                    selectionChanged={(idcur) =>
+                      handleInquiryCurChange(
+                        idcur,
+                        inquiry.IdPurchaseRequestInquiry
+                      )
+                    }
+                    dir="rtl"
+                    value={inquiry.IdCur}
+                    fontFamily={"IranSansLight"}
+                  />
+                  {hasForeigncur() && (
+                    <>
+                      <AmountInput
+                        value={inquiry.ExchangeRate || ""}
+                        name="ExchangeRate"
+                        onChange={(val) =>
+                          handleInquiryExchangeRateChange(
+                            inquiry.IdPurchaseRequestInquiry,
+                            val
+                          )
+                        }
+                        width="100px"
+                        style={{ height: "30px" }}
+                      />
+                      <AmountInput
+                        value={inquiry.ExchangeRateRevert || ""}
+                        name="ExchangeRate"
+                        onChange={(val) =>
+                          handleInquiryExchangeRateRevertChange(
+                            inquiry.IdPurchaseRequestInquiry,
+                            val
+                          )
+                        }
+                        width="110px"
+                        style={{ height: "30px" }}
+                      />
+                      <AmountInput
+                        value={inquiry.IRRAmount || ""}
+                        name="ExchangeRate"
+                        width="110px"
+                        style={{ height: "30px", backgroundColor: "lightblue" }}
+                      />
+                    </>
+                  )}
+                  <input
+                    type="text"
+                    className={style.txt}
+                    value={inquiry.Note || ""}
+                    name="Note"
+                    onChange={(e) =>
+                      handleInquiryChange(e, inquiry.IdPurchaseRequestInquiry)
+                    }
+                    style={{ width: "160px", height: "30px" }}
+                  />
+                  <IoIosTrash
+                    className={style.btnRemove}
+                    onClick={() =>
+                      handleInquiryRemove(inquiry.IdPurchaseRequestInquiry)
+                    }
+                  />
+                </div>
+              ))}
+              <h1>کمیسیون معاملات</h1>
+              <label>تاریخ برگزاری</label>
+              <Datepicker
+                value={data.CommissionDate}
+                onChange={(val) => setDate("CommissionDate", val)}
+                dir="rtl"
+                name="purchase_request_pcommission_date"
+              />
+              <label>زمان شروع</label>
+              <Timepicker
+                value={data.StartTime}
+                onChange={(val) => setTime("StartTime", val)}
+              />
+              <label>زمان پایان</label>
+              <Timepicker
+                value={data.EndTime}
+                onChange={(val) => setTime("EndTime", val)}
+              />
+              <label>محل برگزاری</label>
+              <input
+                type="text"
+                className={style.txt}
+                value={data.Venue || ""}
+                name="Venue"
+                onChange={(e) => handleUpdate(e)}
+                style={{ width: "260px" }}
+              />
+              <label>نوع معامله</label>
+              <div className={style.subject1}>
+                <div
+                  onClick={() => setData({ ...data, Subject1: "تامین اقلام" })}
+                  className={
+                    data.Subject1 == "تامین اقلام" ? style.selected : ""
+                  }
+                >
+                  تامین اقلام
+                </div>
+                <div
+                  onClick={() => setData({ ...data, Subject1: "تامین خدمات" })}
+                  className={
+                    data.Subject1 == "تامین خدمات" ? style.selected : ""
+                  }
+                >
+                  تامین خدمات
+                </div>
+                <div
+                  onClick={() => setData({ ...data, Subject1: "فروش" })}
+                  className={data.Subject1 == "فروش" ? style.selected : ""}
+                >
+                  فروش
+                </div>
+              </div>
+              <label>موضوع</label>
+              <input
+                type="text"
+                className={style.txt}
+                value={data.Subject2 || ""}
+                name="Subject2"
+                onChange={(e) => handleUpdate(e)}
+              />
+              <label>مدارک ضمیمه</label>
+              <div className={style.attached}>
+                <div
+                  onClick={() =>
+                    setData({
+                      ...data,
+                      IsPurchaseRequestAttached:
+                        data.IsPurchaseRequestAttached == 1 ? 0 : 1,
+                    })
+                  }
+                  className={
+                    data.IsPurchaseRequestAttached ? style.selected : ""
+                  }
+                >
+                  درخواست خرید کالا و خدمات
+                </div>
+                <div
+                  onClick={() =>
+                    setData({
+                      ...data,
+                      IsInquiriesAttached:
+                        data.IsInquiriesAttached == 1 ? 0 : 1,
+                    })
+                  }
+                  className={data.IsInquiriesAttached ? style.selected : ""}
+                >
+                  استعلام های جمع آوری شده
+                </div>
+                <div
+                  onClick={() =>
+                    setData({
+                      ...data,
+                      IsOffersTableAttached:
+                        data.IsOffersTableAttached == 1 ? 0 : 1,
+                    })
+                  }
+                  className={data.IsOffersTableAttached ? style.selected : ""}
+                >
+                  جدول مقایسه قیمت
+                </div>
+                <div
+                  onClick={() =>
+                    setData({
+                      ...data,
+                      IsSkippingFormalitiesReportAttached:
+                        data.IsSkippingFormalitiesReportAttached == 1 ? 0 : 1,
+                    })
+                  }
+                  className={
+                    data.IsSkippingFormalitiesReportAttached
+                      ? style.selected
+                      : ""
+                  }
+                >
+                  گزارش ترک تشریفات
+                </div>
+                <input
+                  type="text"
+                  className={style.txt}
+                  value={data.OtherAttachments || ""}
+                  name="OtherAttachments"
+                  onChange={(e) => handleUpdate(e)}
+                  style={{ width: "360px" }}
+                />
+              </div>
+              <label>برنده</label>
+              <Selector
+                data={inqueries}
+                id="Title"
+                title="Title"
+                width={135}
+                selectionChanged={(title) => {
+                  setData({ ...data, Winner: title });
+                }}
+                dir="rtl"
+                value={data.Winner}
+                fontFamily={"IranSansLight"}
+              />
+              <label>نحوه معامله</label>
+              <div className={style.how}>
+                <div
+                  onClick={() => setData({ ...data, HowToWork: "عقد قرارداد" })}
+                  className={
+                    data.HowToWork == "عقد قرارداد" ? style.selected : ""
+                  }
+                >
+                  عقد قرارداد
+                </div>
+                <div
+                  onClick={() =>
+                    setData({ ...data, HowToWork: "الحاقیه بر قرارداد قبلی" })
+                  }
+                  className={
+                    data.HowToWork == "الحاقیه بر قرارداد قبلی"
+                      ? style.selected
+                      : ""
+                  }
+                >
+                  الحاقیه بر قرارداد قبلی
+                </div>
+                <div
+                  onClick={() =>
+                    setData({ ...data, HowToWork: "صدور سفارش خرید (فاکتوری)" })
+                  }
+                  className={
+                    data.HowToWork == "صدور سفارش خرید (فاکتوری)"
+                      ? style.selected
+                      : ""
+                  }
+                >
+                  صدور سفارش خرید (فاکتوری)
+                </div>
+              </div>
+              <label>سایر تصمیمات</label>
+              <textarea
+                type="text"
+                className={style.txt}
+                value={data.Desicions || ""}
+                style={{ width: "100%", height: "100px" }}
+                name="Desicions"
+                onChange={(e) => handleUpdate(e)}
+              ></textarea>
+            </>
+          )}
       </FormContainer>
       {messageText && (
         <Message
