@@ -22,7 +22,7 @@ export default function AmountInput(props) {
         value={thousandSep(value)}
         // onInput={handleChange}
         dir="ltr"
-        style={{ width: width }}
+        style={{ width: width, ...props.style }}
         onChange={(e) => handleChange(e.target.value)}
         disabled={disabled}
       />
