@@ -438,13 +438,15 @@ export default function Loan() {
   useEffect(() => {
     setLoan({
       ...loan,
-      Score: Math.round(
-        (loan.MonthsInCompany ? loan.MonthsInCompany / 12 : 0) +
-          (loan.MonthsOtherCompanies ? loan.MonthsOtherCompanies / 24 : 0) +
-          (loan.RiskScore ? loan.RiskScore : 0) +
-          (loan.HierarchyScore ? loan.HierarchyScore : 0) +
-          (loan.PerformanceScore ? loan.PerformanceScore : 0)
-      ),
+      Score:
+        Math.round(
+          ((loan.MonthsInCompany ? loan.MonthsInCompany / 12 : 0) +
+            (loan.MonthsOtherCompanies ? loan.MonthsOtherCompanies / 24 : 0) +
+            (loan.RiskScore ? loan.RiskScore : 0) +
+            (loan.HierarchyScore ? loan.HierarchyScore : 0) +
+            (loan.PerformanceScore ? loan.PerformanceScore : 0)) *
+            100
+        ) / 100,
     });
   }, [
     loan.MonthsInCompany,
