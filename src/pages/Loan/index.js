@@ -62,7 +62,7 @@ export default function Loan() {
   const [messageText, setMessageText] = useState(false);
 
   const [saving, setSaving] = useState(false);
-  const [cancelling, setCancelling] = useState(false);
+  // const [cancelling, setCancelling] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
   const { iduser, idloan } = useParams();
@@ -110,6 +110,34 @@ export default function Loan() {
               ...loan,
               FullName: JSON.parse(res[0].data)[0].FullName,
               PerNo: JSON.parse(res[0].data)[0].PerNo,
+              MonthsInCompany: JSON.parse(res[0].data)[0].EmploymentMonth,
+              HierarchyScore:
+                JSON.parse(res[0].data)[0].HierarchyLevel == 5
+                  ? 30
+                  : JSON.parse(res[0].data)[0].HierarchyLevel == 4
+                  ? 24
+                  : JSON.parse(res[0].data)[0].HierarchyLevel == 3
+                  ? 18
+                  : JSON.parse(res[0].data)[0].HierarchyLevel == 2
+                  ? 12
+                  : 10,
+              RiskScore:
+                JSON.parse(res[0].data)[0]
+                  .UserGroups.split(",")
+                  .includes("11") ||
+                JSON.parse(res[0].data)[0]
+                  .UserGroups.split(",")
+                  .includes("21") ||
+                JSON.parse(res[0].data)[0].UserGroups.split(",").includes("82")
+                  ? 30
+                  : JSON.parse(res[0].data)[0]
+                      .UserGroups.split(",")
+                      .includes("44") ||
+                    JSON.parse(res[0].data)[0]
+                      .UserGroups.split(",")
+                      .includes("109")
+                  ? 20
+                  : 10,
             });
           });
         window.parent.postMessage({ title: "loaded", tabno }, "*");
@@ -145,6 +173,7 @@ export default function Loan() {
 
   const handleSave = (e) => {
     e.preventDefault();
+    console.log(loan);
     if (!loan.IdLoan) {
       setSaving(true);
       axios.post(`${host}/users/${iduser}/loan`, loan).then((res) => {
@@ -255,6 +284,8 @@ export default function Loan() {
       axios
         .patch(`${host}/users/${iduser}/loan/${loan.IdLoan}/send_to_hr`, {
           Note: loan.ManagerNote,
+          PerformanceScore: loan.PerformanceScore,
+          Score: loan.Score,
         })
         .then((res) => {
           setSaving(false);
@@ -273,6 +304,8 @@ export default function Loan() {
       axios
         .patch(`${host}/users/${iduser}/loan/${loan.IdLoan}/send_to_ceo`, {
           Note: loan.HrNote,
+          MonthsOtherCompanies: loan.MonthsOtherCompanies,
+          Score: loan.Score,
         })
         .then((res) => {
           setSaving(false);
@@ -401,6 +434,25 @@ export default function Loan() {
       InstallmentLastMonth: newy + "/" + newm,
     });
   };
+
+  useEffect(() => {
+    setLoan({
+      ...loan,
+      Score: Math.round(
+        (loan.MonthsInCompany ? loan.MonthsInCompany / 12 : 0) +
+          (loan.MonthsOtherCompanies ? loan.MonthsOtherCompanies / 24 : 0) +
+          (loan.RiskScore ? loan.RiskScore : 0) +
+          (loan.HierarchyScore ? loan.HierarchyScore : 0) +
+          (loan.PerformanceScore ? loan.PerformanceScore : 0)
+      ),
+    });
+  }, [
+    loan.MonthsInCompany,
+    loan.MonthsOtherCompanies,
+    loan.RiskScore,
+    loan.HierarchyScore,
+    loan.PerformanceScore,
+  ]);
 
   return (
     <>
@@ -645,6 +697,19 @@ export default function Loan() {
         {loan.IdStep > 2 && (
           <>
             <h1>مدیر منابع انسانی</h1>
+            <label>سابقه کار خارج از شرکت به ماه</label>
+            <input
+              type="number"
+              className={style.txt}
+              min={0}
+              max="360"
+              style={{ width: "70px" }}
+              value={loan.MonthsOtherCompanies}
+              disabled={!(loan.IdStep == 3 && loan.IdHr == iduser)}
+              onChange={(e) =>
+                setLoan({ ...loan, MonthsOtherCompanies: e.target.value })
+              }
+            />
             <label>توضیحات</label>
             <textarea
               type="text"
@@ -660,6 +725,36 @@ export default function Loan() {
         {loan.IdStep > 1 && (
           <>
             <h1>مدیر واحد</h1>
+            <lable>عملکرد متقاضی</lable>
+            <div className={style.performance}>
+              <div
+                onClick={() => {
+                  if (loan.IdStep == 2 && loan.IdManager == iduser)
+                    setLoan({ ...loan, PerformanceScore: 10 });
+                }}
+                className={loan.PerformanceScore == 10 ? style.selected : ""}
+              >
+                خوب
+              </div>
+              <div
+                onClick={() => {
+                  if (loan.IdStep == 2 && loan.IdManager == iduser)
+                    setLoan({ ...loan, PerformanceScore: 7 });
+                }}
+                className={loan.PerformanceScore == 7 ? style.selected : ""}
+              >
+                متوسط
+              </div>
+              <div
+                onClick={() => {
+                  if (loan.IdStep == 2 && loan.IdManager == iduser)
+                    setLoan({ ...loan, PerformanceScore: 4 });
+                }}
+                className={loan.PerformanceScore == 4 ? style.selected : ""}
+              >
+                ضعیف
+              </div>
+            </div>
             <label>توضیحات</label>
             <textarea
               type="text"
@@ -775,6 +870,31 @@ export default function Loan() {
             )
           }
         ></textarea>
+        <div className={style.scores}>
+          <h2> {loan.Score} امتیاز</h2>
+          <label>سابقه کار در شرکت</label>
+          <label>
+            {loan.MonthsInCompany == null
+              ? "?"
+              : (loan.MonthsInCompany / 12).toFixed(2)}
+          </label>
+          <label>سابقه کار خارج از شرکت</label>
+          <label>
+            {loan.MonthsOtherCompanies == null
+              ? "?"
+              : (loan.MonthsOtherCompanies / 24).toFixed(2)}
+          </label>
+          <label>جایگاه</label>
+          <label>
+            {loan.HierarchyScore == null ? "?" : loan.HierarchyScore}
+          </label>
+          <label>ریسک شغلی</label>
+          <label>{loan.RiskScore == null ? "?" : loan.RiskScore}</label>
+          <label>عملکرد</label>
+          <label>
+            {loan.PerformanceScore == null ? "?" : loan.PerformanceScore}
+          </label>
+        </div>
       </FormContainer>
       {messageText && (
         <Message
