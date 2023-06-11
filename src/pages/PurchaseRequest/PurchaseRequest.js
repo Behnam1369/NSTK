@@ -301,7 +301,7 @@ export default function PR() {
       const getTradeSize = async (amount, abr) => {
         await axios
           .get(
-            `http://localhost:3000/purchase_request/get_trade_size?abr=${abr}&amount=${amount}`
+            `${host}/purchase_request/get_trade_size?abr=${abr}&amount=${amount}`
           )
           .then((res) => {
             setIdTradeSize(res.data.result);
@@ -436,7 +436,6 @@ export default function PR() {
     setInquiries(
       inqueries.map((inquiry) => {
         if (inquiry.IdPurchaseRequestInquiry == id) {
-          console.log(inquiry.IdCur);
           if (inquiry.IdCur == 99) {
             return {
               ...inquiry,
