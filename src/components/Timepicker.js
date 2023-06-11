@@ -1,19 +1,20 @@
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import style from "./Timepicker.module.scss";
+
 export default function Timepicker(props) {
-  const [time, setTime] = useState(props.value || ":");
+  const [time, setTime] = useState(":");
   const minuteInput = useRef(null);
   const hourInput = useRef(null);
-
-  useEffect(() => {
-    if (props.value != time) props.onChange(time);
-  }, [props.value, props.onChange, time]);
 
   useEffect(() => {
     if (props.value) {
       setTime(props.value);
     }
-  }, [props.value]);
+  }, [props.value || ":"]);
+
+  useEffect(() => {
+    props.onChange(time == ":" ? "" : time);
+  }, [time]);
 
   const handleChangeH = (e) => {
     if (isNaN(e.target.value) || e.target.value === "") {
@@ -24,7 +25,6 @@ export default function Timepicker(props) {
         let h = val % 24 >= 10 ? val % 24 : "0" + (val % 24);
         setTime(h + ":" + time.split(":")[1]);
       } else {
-        //setHour(e.target.value);
         setTime(e.target.value + ":" + time.split(":")[1]);
       }
     }
@@ -36,14 +36,13 @@ export default function Timepicker(props) {
 
   const handleBlurH = (e) => {
     let val = parseInt(e.target.value);
-    if (val < 10)
-      //setHour("0" + val);
+    if (val < 10) {
       setTime("0" + val + ":" + time.split(":")[1]);
+    }
   };
 
   const handleChangeM = (e) => {
     if (isNaN(e.target.value) || e.target.value === "") {
-      //setMinute("");
       setTime(time.split(":")[0] + ":");
     } else {
       let val = parseInt(e.target.value);
@@ -51,7 +50,6 @@ export default function Timepicker(props) {
         let m = val % 60 >= 10 ? val % 60 : "0" + (val % 60);
         setTime(time.split(":")[0] + ":" + m);
       } else {
-        //setMinute(e.target.value);
         setTime(time.split(":")[0] + ":" + e.target.value);
       }
     }
@@ -63,9 +61,9 @@ export default function Timepicker(props) {
 
   const handleBlurM = (e) => {
     let val = parseInt(e.target.value);
-    if (val < 10)
-      //setMinute("0" + val);
+    if (val < 10) {
       setTime(time.split(":")[0] + ":" + "0" + val);
+    }
   };
 
   return (
@@ -78,8 +76,8 @@ export default function Timepicker(props) {
         max="23"
         placeholder="hh"
         maxLength="2"
-        onChange={(e) => handleChangeH(e)}
-        onBlur={(e) => handleBlurH(e)}
+        onChange={handleChangeH}
+        onBlur={handleBlurH}
         value={time.split(":")[0]}
       />
       <span className={style.colon}>:</span>
@@ -91,8 +89,8 @@ export default function Timepicker(props) {
         max="59"
         placeholder="mm"
         maxLength="2"
-        onChange={(e) => handleChangeM(e)}
-        onBlur={(e) => handleBlurM(e)}
+        onChange={handleChangeM}
+        onBlur={handleBlurM}
         value={time.split(":")[1]}
       />
     </div>

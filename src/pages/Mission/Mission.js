@@ -75,6 +75,7 @@ export default function Mission(props) {
     OtherFiles: "",
   };
   const [data, setData] = useState(defaultData);
+  const [missioners, setMissioners] = useState([]);
   const [searchParams] = useSearchParams();
   const tabno = searchParams.get("tabno");
 
@@ -90,6 +91,7 @@ export default function Mission(props) {
 
           if (idmission) {
             updateSelectedUsers(res.data.data.work_missioners, loaded_users);
+            setMissioners(res.data.data.work_missioners);
             setData(res.data.data.work_mission);
           }
         });
@@ -98,14 +100,20 @@ export default function Mission(props) {
     window.parent.postMessage({ title: "loaded", tabno }, "*");
   }, [iduser]);
 
-  const updateSelectedUsers = (arr, loaded_users) => {
-    arr = arr.map((item) => item.IdUser);
+  const updateSelectedUsers = (missioners, loaded_users) => {
+    let arr = missioners.map((item) => item.IdUser);
     setUsers(
       loaded_users.map((el) => {
         if (arr.includes(el.IdUser)) {
-          return { ...el, selected: true };
+          return {
+            ...el,
+            selected: true,
+          };
         } else {
-          return { ...el, selected: false };
+          return {
+            ...el,
+            selected: false,
+          };
         }
       })
     );
@@ -186,12 +194,12 @@ export default function Mission(props) {
     );
   };
 
-  const handleMissionReport = (e, iduser, idmission, fullname) => {
+  const handleMissionReport = (e, iduser, idmission, idmissioner, fullname) => {
     e.preventDefault();
     window.parent.postMessage(
       {
         title: "work_mission_report",
-        args: { iduser, idmission },
+        args: { iduser, idmission, idmissioner },
         tabTitle: `گزارش ماموریت ${fullname}`,
       },
       "*"
@@ -499,6 +507,9 @@ export default function Mission(props) {
                           e,
                           user.IdUser,
                           data.IdWorkMission,
+                          missioners.find((el) => el.IdUser == user.IdUser)[
+                            "IdWorkMissioner"
+                          ],
                           user.Fname + " " + user.Lname
                         )
                       }
