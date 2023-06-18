@@ -32,7 +32,7 @@ function Selector(props) {
     if (value === null) {
       setText("");
     } else {
-      setText(data.filter((el) => el[props.id] === value)[0][props.title]);
+      setText(data.filter((el) => el[props.id] == value)[0][props.title]);
     }
   }, [value]);
 

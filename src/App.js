@@ -12,6 +12,7 @@ import Survey from "./pages/Survey";
 import MarketReport from "./pages/MarketReport";
 import MarketReportsList from "./pages/MarketReport/MarketReportsList";
 import Loan from "./pages/Loan";
+import Contract from "./pages/Contract";
 export const AppContext = React.createContext();
 
 function App() {
@@ -94,6 +95,11 @@ function App() {
             />
             <Route path="/users/:iduser/loan/new" element={<Loan />} />
             <Route path="/users/:iduser/loan/:idloan" element={<Loan />} />
+            <Route path="/users/:iduser/contract/new" element={<Contract />} />
+            <Route
+              path="/users/:iduser/contract/:idcontract"
+              element={<Contract />}
+            />
             <Route path="*" element={<h1>404</h1>} />
           </Routes>
         </BrowserRouter>
