@@ -76,7 +76,9 @@ export default function Loan() {
         await fetch(`${host}/users/${iduser}/loan/${idloan}/edit`)
           .then((res) => res.json())
           .then((res) => {
-            let lt = JSON.parse(res[0].data)[0].LoanTypes;
+            let lt = JSON.parse(res[0].data)[0].LoanTypes.filter(
+              (lt) => !lt.InActive
+            );
             let l = JSON.parse(JSON.parse(res[0].data)[0].Loan);
             setLoan(l);
             setLoanTypes(lt);
@@ -98,7 +100,9 @@ export default function Loan() {
         await fetch(`${host}/users/${iduser}/loan/new`)
           .then((res) => res.json())
           .then((res) => {
-            setLoanTypes(JSON.parse(res[0].data)[0].LoanTypes);
+            setLoanTypes(
+              JSON.parse(res[0].data)[0].LoanTypes.filter((lt) => !lt.InActive)
+            );
             setSalary(JSON.parse(res[0].data)[0].GrossSalary);
             setEmploymentMonth(JSON.parse(res[0].data)[0].EmploymentMonth);
             setHierarchyLevel(JSON.parse(res[0].data)[0].HierarchyLevel);
