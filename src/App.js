@@ -13,6 +13,7 @@ import MarketReport from "./pages/MarketReport";
 import MarketReportsList from "./pages/MarketReport/MarketReportsList";
 import Loan from "./pages/Loan";
 import Contract from "./pages/Contract";
+import Suggestion from "./pages/Suggestion";
 export const AppContext = React.createContext();
 
 function App() {
@@ -99,6 +100,14 @@ function App() {
             <Route
               path="/users/:iduser/contract/:idcontract"
               element={<Contract />}
+            />
+            <Route
+              path="/users/:iduser/suggestion/new/:suggestion_type"
+              element={<Suggestion />}
+            />
+            <Route
+              path="/users/:iduser/suggestion/:idsuggestion"
+              element={<Suggestion />}
             />
             <Route path="*" element={<h1>404</h1>} />
           </Routes>

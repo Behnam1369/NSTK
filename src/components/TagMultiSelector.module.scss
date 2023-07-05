@@ -1,0 +1,30 @@
+@import "../public.scss";
+
+.items {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+
+  > div {
+    border: solid 1px #6e6eb7;
+    color: #6e6eb7;
+    background-color: #efeff6;
+    padding: 3px 6px;
+    border-radius: 8px;
+    font-family: IranSansLight;
+    font-size: 12px;
+
+    &:hover {
+      cursor: pointer;
+    }
+  }
+
+  > div.disabled {
+    cursor: default;
+  }
+
+  > div.selected {
+    background-color: $main-color;
+    color: whitesmoke;
+  }
+}

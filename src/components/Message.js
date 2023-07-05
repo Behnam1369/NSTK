@@ -15,7 +15,7 @@ export default function Message(props) {
             className={style.close}
           />
         </div>
-        <p>{props.text}</p>
+        <p dangerouslySetInnerHTML={{ __html: props.text}}></p>
         <button onClick={(e) => handleClose(e)}>تایید</button>
       </div>
     </div>
