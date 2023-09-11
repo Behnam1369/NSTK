@@ -14,6 +14,8 @@ import MarketReportsList from "./pages/MarketReport/MarketReportsList";
 import Loan from "./pages/Loan";
 import Contract from "./pages/Contract";
 import Suggestion from "./pages/Suggestion";
+import VoyageDates from "./pages/VoyageDates";
+import VoyagesDatesDashboard from "./pages/VoyageDates/VoyagesDatesDashboard";
 export const AppContext = React.createContext();
 
 function App() {
@@ -108,6 +110,16 @@ function App() {
             <Route
               path="/users/:iduser/suggestion/:idsuggestion"
               element={<Suggestion />}
+            />
+            <Route
+              path="/users/:iduser/voyage-dates/dashboard"
+              element={<VoyagesDatesDashboard />}
+            />
+            <Route
+              path="/users/:iduser/voyage-dates/idvoyage/:idvoyage/idcontract/:idcontract/voyageno/:voyageno/eta/:eta/vessel/:vessel"
+              element={
+                <VoyageDates idVoyage={195} vessel="Elkor" voyageNo={2} />
+              }
             />
             <Route path="*" element={<h1>404</h1>} />
           </Routes>

@@ -16,7 +16,7 @@ import AmountInput from "../../components/AmountInput";
 import axios from "axios";
 let defaultLoan = {
   IdLoan: null,
-  IdUser: 1,
+  IdUser: null,
   FullName: null,
   PerNo: null,
   IdLoanType: null,
@@ -47,7 +47,8 @@ let defaultLoan = {
 };
 
 export default function Loan() {
-  const [loan, setLoan] = useState(defaultLoan);
+  const { iduser, idloan } = useParams();
+  const [loan, setLoan] = useState({...defaultLoan, IdUser: iduser});
   const [loanTypes, setLoanTypes] = useState([]);
   const [loanType, setLoanType] = useState(null);
   const [fullName, setFullName] = useState("");
@@ -65,7 +66,6 @@ export default function Loan() {
   // const [cancelling, setCancelling] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
-  const { iduser, idloan } = useParams();
 
   const [searchParams] = useSearchParams();
   const tabno = searchParams.get("tabno");

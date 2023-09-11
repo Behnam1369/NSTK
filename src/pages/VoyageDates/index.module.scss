@@ -1,0 +1,17 @@
+.main {
+  background-color: whiteSmoke;
+  height: 100%;
+
+  h1 {
+    margin: 0;
+    padding: 10px;
+    text-align: center;
+  }
+
+  .cards {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 25px;
+    padding: 50px;
+  }
+}

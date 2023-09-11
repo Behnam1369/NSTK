@@ -1,0 +1,69 @@
+@import "../../public.scss";
+
+.row {
+  display: grid;
+  grid-template-columns: 150px repeat(23, calc((100% - 160px) / 23 ));
+  gap: 0;
+
+  > span {
+    border: solid 1px silver;
+    text-align: center;
+    cursor: default;
+    position: relative;
+
+    > span {
+      cursor: pointer;
+      transition: 0.2s;
+
+      &:hover {
+        color: $main-color;
+      }
+    }
+
+    .hovering{
+      position: absolute;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 2;
+      margin: 0;
+      border: 0;
+      background-color: #d9ff0045;
+    }
+  }
+
+  span.Estimated {
+    color: rgb(157, 157, 157);
+    background-color: transparent;
+    color: $main-color;
+  }
+
+    span.eta {
+      background-color: yellow;
+    }
+
+        span.Actual {
+          font-weight: bold;
+          background-color: $main-color;
+          color: whitesmoke;
+        }
+
+  
+}
+
+.row:nth-child(odd) span.Estimated{
+  background-color: white;
+}
+
+.row:nth-child(odd) span:nth-child(1) {
+  background-color: white;
+}
+
+.row:nth-child(odd) span.Estimated.eta {
+  background-color: yellow;
+}
+
+.passed {
+  color: red !important;
+  font-weight: bold;
+}
