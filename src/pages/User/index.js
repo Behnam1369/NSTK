@@ -1,6 +1,6 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom"
+import { useParams, useSearchParams } from "react-router-dom"
 import { host } from "../../Utils/host";
 import { IoSaveOutline, IoTrash } from "react-icons/io5";
 import style from "./index.module.scss";
@@ -17,6 +17,9 @@ export default function User() {
   const [anniversary, setAnniversary] = useState("");
   const [saving, setSaving] = useState(false);
   const [messageText, setMessageText] = useState(false);
+
+  const [searchParams] = useSearchParams();
+  const tabno = searchParams.get("tabno");
   
   useEffect(() => {
     const getUser = async () => {
@@ -48,7 +51,10 @@ export default function User() {
           setSpouse(birthdays.find((bd) => bd.Type == "Spouse"))
         if (birthdays.filter((bd) => bd.Type == "Anniversary").length > 0) 
           setAnniversary(birthdays.find((bd) => bd.Type == "Anniversary"))
+        
       })
+
+      window.parent.postMessage({ title: "loaded", tabno }, "*");
     }
 
     getUser();
@@ -85,8 +91,6 @@ export default function User() {
     e.preventDefault();
     setBirthdays(birthdays.filter((bd) => bd.IdBirthDay != id))
   }
-
-  console.log(birthdays);
 
   return (
     <div>
