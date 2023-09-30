@@ -1,0 +1,16 @@
+@import "../../public.scss";
+
+.formButton {
+  font-size: 11.5px;
+  margin: 10px 0;
+}
+
+.childDiv {
+  margin: 0 0 10px 0;
+  display: flex;
+  max-width: 320px;
+}
+
+.btnRemove:hover {
+  border: solid 1px $main-color;
+}
