@@ -484,7 +484,7 @@ export default function Datepicker(props) {
   };
 
   return (
-    <div className={`${style.datepicker} ${style[calformat]}`} ref={container}>
+    <div className={`${style.datepicker} ${style[calformat]}`} ref={container} style={props.style || {}}>
       <div className={style.wrapper}>
         <input
           type="text"
