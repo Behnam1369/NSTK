@@ -65,7 +65,7 @@ export default function User() {
   const handleSave = (e) => {
     e.preventDefault();
     setSaving(true);
-    axios.post(`${host}/personnel/${idwinkart}/save_birthdays`, {birthdays}).then((res)=> {
+    axios.post(`${host}/personnel/${idwinkart}/save_birthdays`, {birthdays: birthdays.filter(el => el.Date)}).then((res)=> {
       if (res.data == "success") {
         setMessageText("اطلاعات با موفقیت ذخیره شد")
       } else {
