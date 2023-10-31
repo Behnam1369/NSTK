@@ -17,6 +17,7 @@ import Suggestion from "./pages/Suggestion";
 import VoyageDates from "./pages/VoyageDates";
 import VoyagesDatesDashboard from "./pages/VoyageDates/VoyagesDatesDashboard";
 import User from "./pages/User";
+import Ride from "./pages/Ride";
 export const AppContext = React.createContext();
 
 function App() {
@@ -123,6 +124,8 @@ function App() {
               }
             />
             <Route path="users/:idwinkart/profile" element={<User /> } />
+            <Route path="/users/:iduser/rides/new" element={<Ride />} />
+            <Route path="/users/:iduser/rides/:idride" element={<Ride />} />
             <Route path="*" element={<h1>404</h1>} />
           </Routes>
         </BrowserRouter>
