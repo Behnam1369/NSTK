@@ -2,14 +2,14 @@ import { useParams, useSearchParams } from "react-router-dom";
 import style from "./index.module.scss";
 import { useEffect, useState } from "react";
 import Message from "../../components/Message";
-import { shamsiDate, thousandSep, today } from "../../Utils/public";
+import { shamsiDate } from "../../Utils/public";
 import FormContainer from "../../components/FormContainer";
 import { host } from "../../Utils/host";
 import axios from "axios";
 import Datepicker from "../../components/Datepicker";
 import Timepicker from "../../components/Timepicker";
 import TagSingleSelector from "../../components/TagSingleSelector";
-import { IoAttachOutline, IoSaveOutline, IoChevronForward } from "react-icons/io5";
+import { IoAttachOutline, IoSaveOutline } from "react-icons/io5";
 
 const defaultRide = {
   IdRide: null,
@@ -19,6 +19,8 @@ const defaultRide = {
   Role: null,
   IdDept: null,
   Dept: null,
+  RequestForOthers: 0,
+  FinalUser: null,
   IdDriver: null,
   Driver: null,
   IdRideType: null,
@@ -45,6 +47,7 @@ const states = [
 const rideTypes= [
   {IdRideType: 1, Title:'خودرو'},
   {IdRideType: 2, Title:'پیک'},
+  {IdRideType: 3, Title:'اسنپ'},
 ]
 
 const drivers = [
@@ -107,6 +110,7 @@ export default function Ride() {
   
   const handleSave = (e) => {
     e.preventDefault();
+    console.log(ride);
     if (!ride.IdRide) {
       setSaving(true);
       axios.post(`${host}/users/${iduser}/rides`, ride).then((res) => {
@@ -179,6 +183,14 @@ export default function Ride() {
     })
   }
 
+  const handleRequestForOthers = () => {
+    if (ride.RequestForOthers == 1) {
+      setRide({...ride, RequestForOthers: 0, FinalUser: ride.FullName })
+    } else {
+      setRide({...ride, RequestForOthers: 1, FinalUser: '' })
+    }
+  }
+
   return (
     <> 
       <div className={`${style.operationButtons}`} dir="rtl">
@@ -233,6 +245,22 @@ export default function Ride() {
         <span>{ride.Role}</span>
         <label>واحد سازمانی</label>
         <span>{ride.Dept}</span>
+        <label>درخواست برای دیگران</label>
+        <label>
+          <input type='checkbox' checked={ride.RequestForOthers} onChange={handleRequestForOthers} />
+          استفاده کننده شخص دیگری می باشد
+        </label>
+        {ride.RequestForOthers == 1 && (<>
+          <label>استفاده کننده</label>
+          <input
+            type="text"
+            className={style.txt}
+            value={ride.FinalUser}
+            style={{ width: "300px", height: "25px" }}
+            name="FinalUser"
+            onChange={(e) => handleUpdate(e)}
+          />
+        </>)}
         <label>مقصد</label>
         <input
           type="text"
@@ -258,14 +286,7 @@ export default function Ride() {
           value={ride.EndTime}
           onChange={(val) => setTime("EndTime", val)}
         />
-        <label>نوع وسیله مقلیه</label>
-        <TagSingleSelector
-          data= {rideTypes}
-          id="IdRideType"
-          title="Title"
-          selectedValue={ride.IdRideType}
-          onChange={(val) => handleRideTypeChange(val)}
-        />
+        
         <label>توضیحات</label>
         <textarea
           type="text"
@@ -277,6 +298,14 @@ export default function Ride() {
         ></textarea>
         {ride.IdRide && admins.includes(iduser) && (
           <>
+            <label>نوع وسیله نقلیه</label>
+            <TagSingleSelector
+              data= {rideTypes}
+              id="IdRideType"
+              title="Title"
+              selectedValue={ride.IdRideType}
+              onChange={(val) => handleRideTypeChange(val)}
+            />
             <label>راننده / پیک</label>
             <TagSingleSelector
               data= {drivers.filter(el => el.IdRideType == ride.IdRideType )}
