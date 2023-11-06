@@ -108,3 +108,5 @@ export const isNumeric = (str) => {
 };
 
 export const today = new Date().toISOString().slice(0, 10);
+
+export const shamsiMonths = ["فروردین", "اردیبهشت", "خرداد", "تیر", "مرداد", "شهریور", "مهر", "آبان", "آذر", "دی", "بهمن", "اسفند"];
