@@ -12,6 +12,7 @@ import Survey from "./pages/Survey";
 import MarketReport from "./pages/MarketReport";
 import MarketReportsList from "./pages/MarketReport/MarketReportsList";
 import Loan from "./pages/Loan";
+import EmploymentLetter from "./pages/EmploymentLetter";
 import Contract from "./pages/Contract";
 import Suggestion from "./pages/Suggestion";
 import VoyageDates from "./pages/VoyageDates";
@@ -100,6 +101,9 @@ function App() {
             />
             <Route path="/users/:iduser/loan/new" element={<Loan />} />
             <Route path="/users/:iduser/loan/:idloan" element={<Loan />} />
+            <Route path="/users/:iduser/employmentletter/new" element={<EmploymentLetter />} />
+            <Route path="/users/:iduser/employmentletter/:idemploymentletter" element={<EmploymentLetter />} />
+
             <Route path="/users/:iduser/contract/new" element={<Contract />} />
             <Route
               path="/users/:iduser/contract/:idcontract"
