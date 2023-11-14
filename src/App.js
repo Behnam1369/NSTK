@@ -19,6 +19,8 @@ import VoyageDates from "./pages/VoyageDates";
 import VoyagesDatesDashboard from "./pages/VoyageDates/VoyagesDatesDashboard";
 import User from "./pages/User";
 import Ride from "./pages/Ride";
+import EmployeeEvaluation from "./pages/EmployeeEvaluation";
+import Evaluation from "./pages/EmployeeEvaluation/evaluation";
 export const AppContext = React.createContext();
 
 function App() {
@@ -103,7 +105,8 @@ function App() {
             <Route path="/users/:iduser/loan/:idloan" element={<Loan />} />
             <Route path="/users/:iduser/employmentletter/new" element={<EmploymentLetter />} />
             <Route path="/users/:iduser/employmentletter/:idemploymentletter" element={<EmploymentLetter />} />
-
+            <Route path="/users/:iduser/employee_evaluation" element={<EmployeeEvaluation />} />
+            <Route path="/users/:iduser/employee_evaluation/:idemployeeevaluationuser" element={<Evaluation />} />
             <Route path="/users/:iduser/contract/new" element={<Contract />} />
             <Route
               path="/users/:iduser/contract/:idcontract"

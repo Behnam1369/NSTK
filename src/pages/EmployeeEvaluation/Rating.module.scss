@@ -1,0 +1,53 @@
+.main {
+  display: flex;
+  align-items: center;
+  padding: 2px;
+
+  .star{
+    font-size: 26px;
+    color: silver;
+  }
+  
+  .ratable.hovering {
+    color: gold;
+    cursor: pointer;
+  }
+  
+  .prerated {
+    color: lightgreen;
+  }
+  
+  .rated {
+    color: lime;
+  }
+  
+  
+  .rate, .weight,.weightedRate {
+    height: 30px;
+    width: 100px;
+    background-color: blue;
+    color: white;
+    font-family: Volte;
+    font-weight: bold;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    
+    border-radius: 5px;
+    color: rgba(245, 245, 178, 0.933);
+  }
+
+  .rate {
+    margin-right: 30px;
+  }
+
+  .weight {
+    margin-right: 10px;
+  }
+
+  .weightedRate {
+    margin-right: 10px;
+  }
+  
+}
+

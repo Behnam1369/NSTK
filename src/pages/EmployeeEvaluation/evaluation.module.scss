@@ -1,0 +1,70 @@
+@import "../../public.scss";
+
+h1 {
+  font-family: IranSans;
+}
+
+.questions {
+  direction: rtl; 
+  width: 100%;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+ 
+  .heading {
+    max-width: 1050px;
+    display: grid;
+    grid-template-columns: 400px 487px;
+
+    p {
+      margin: 0;
+    }
+
+    > div {
+      font-family: IranSansLight;
+      font-size: 12px;
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      font-weight: bold;
+
+      div {
+        border-bottom: solid 1px blue;
+        width: 100px;
+        text-align: center;
+      }
+    }
+
+    h2 {
+      border-bottom: solid 1px blue;
+      width: 320px;
+      text-align: center;
+    }
+  }
+
+  .question {
+    max-width: 1050px;
+    display: grid;
+    grid-template-columns: 400px 487px;
+    border-bottom: solid 1px silver;
+    padding-right: 10px;
+    
+    p {
+      max-width: 500px;
+      margin: 0;
+      font-family: IranSans;
+      display: flex;
+      align-items: center;
+    }
+
+    &:hover {
+      background-color: white;
+    }
+  }
+  
+  .footer{
+    padding: 50px;
+    display: flex;
+    gap: 10px;
+  }
+}
