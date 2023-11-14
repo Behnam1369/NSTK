@@ -127,6 +127,7 @@ body {
 .formButton {
   @include button;
   border: solid 1px $main-color;
+  transition: 0.2s;
 }
 
 .formButton:enabled:hover {

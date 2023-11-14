@@ -38,6 +38,24 @@ export const thousandSep = (num) => {
   }
 };
 
+export const thousandSepDec = (val , dec) => {
+  var res;
+  var newval = Math.round(parseFloat(val * Math.pow(10, dec))) / Math.pow(10, dec);
+  if (val >= 0) {
+      var parts = newval.toString().split(".");
+      parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+      if (parts.length == 1) parts.push("0".repeat(dec));
+      res = parts.join(".");
+  } else {
+      var parts = (-newval).toString().split(".");
+      parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+      if (parts.length == 1) parts.push("0".repeat(dec));
+      res = "(" + parts.join(".") + ")";
+  }
+  return res;
+}
+
+
 export const toNumber = (num) => {
   return num.replace(/,/g, "");
 };
