@@ -5,6 +5,7 @@ import { host } from "../../Utils/host";
 import Rating from "./Rating";
 import style from "./evaluation.module.scss";
 import Message from "../../components/Message";
+import { yyyy_mm_ddToDate } from "../../Utils/public";
 
 export default function Evaluation() {
   const [questions, setQuestions] = useState([]);
@@ -39,8 +40,6 @@ export default function Evaluation() {
       }
     }))
   }
-
-  console.log(questions);
 
   const score = () => {
     console.log('score')
@@ -84,6 +83,16 @@ export default function Evaluation() {
     return false
   }
 
+
+  
+
+  const isExpired = () => {
+    const ratingStartDate = () =>  yyyy_mm_ddToDate(questions[0].RatingStartDate);
+    const today = new Date();
+    let diff = today - ratingStartDate();
+    return  diff / (1000 * 3600 * 24) > 5;
+  }
+
   return (
     <div>
       <div className={style.questions}>
@@ -93,20 +102,21 @@ export default function Evaluation() {
         <div className={style.heading} >
           <p></p>
           <div>
-          <h2>نمره تراز شده: {score()}</h2>
+            <h2>نمره تراز شده: {score()}</h2>
           </div>
         </div>
         <div className={style.heading} >
           <p></p>
           <div>
             <div>امتیاز</div>
-            <div>ضریب</div>
-            <div>امتیاز تراز شده</div>
+
+                <div style={{visibility: questions.length > 0 && isExpired()  && iduser != questions[0].IdUser? 'visible' : 'hidden'}}>ضریب</div>  
+                <div style={{visibility: questions.length > 0 && isExpired()  && iduser != questions[0].IdUser? 'visible' : 'hidden'}}>امتیاز تراز شده</div>
           </div>
         </div>
         {questions.map((question) => <div className={style.question} key={question.IdEmpolyeeEvaluationQuestion}>
           <p>{question.Title}</p>
-          <Rating question={question} iduser={iduser} onRate={(val) => rate(val, question.IdEmpolyeeEvaluationQuestion) }/>
+          <Rating question={question} iduser={iduser} isExpired={isExpired()} onRate={(val) => rate(val, question.IdEmpolyeeEvaluationQuestion) }/>
         </div>)}
         <div className={style.footer}>
           {ratable() &&  <button className={style.formButton} onClick={(e) => handleSave(e)}>ذخیره و ارسال فرم ارزیابی</button>}

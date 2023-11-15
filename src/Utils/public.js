@@ -128,3 +128,10 @@ export const isNumeric = (str) => {
 export const today = new Date().toISOString().slice(0, 10);
 
 export const shamsiMonths = ["فروردین", "اردیبهشت", "خرداد", "تیر", "مرداد", "شهریور", "مهر", "آبان", "آذر", "دی", "بهمن", "اسفند"];
+
+export const yyyy_mm_ddToDate = (dateString) => {
+  var year        = dateString.substring(0,4);
+  var month       = dateString.substring(5,7);
+  var day         = dateString.substring(8,10);
+  return new Date(year, month-1, day);
+}
