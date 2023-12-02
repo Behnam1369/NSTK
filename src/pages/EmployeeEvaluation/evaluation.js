@@ -109,9 +109,10 @@ export default function Evaluation() {
           <p></p>
           <div>
             <div>امتیاز</div>
-
-                <div style={{visibility: questions.length > 0 && isExpired()  && iduser != questions[0].IdUser? 'visible' : 'hidden'}}>ضریب</div>  
-                <div style={{visibility: questions.length > 0 && isExpired()  && iduser != questions[0].IdUser? 'visible' : 'hidden'}}>امتیاز تراز شده</div>
+                {/* <div style={{visibility: questions.length > 0 && isExpired()  && iduser != questions[0].IdUser? 'visible' : 'hidden'}}>ضریب</div>  
+                <div style={{visibility: questions.length > 0 && isExpired()  && iduser != questions[0].IdUser? 'visible' : 'hidden'}}>امتیاز تراز شده</div> */}
+                <div style={{visibility: iduser == 1 ? 'visible' : 'hidden'}}>ضریب</div>  
+                <div style={{visibility: iduser == 1 ? 'visible' : 'hidden'}}>امتیاز تراز شده</div>
           </div>
         </div>
         {questions.map((question) => <div className={style.question} key={question.IdEmpolyeeEvaluationQuestion}>

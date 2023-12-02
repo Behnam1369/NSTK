@@ -43,7 +43,7 @@ export default function Rating({ question, iduser, isExpired, onRate }) {
           /> 
       ))}
       <span className={style.rate}>{rate()}</span>
-      {isExpired && question.IdUser != iduser && (<>
+      {iduser == 1 && (<>
         <span className={style.weight}>{question.Weight.toFixed(2)}</span>
         <span className={style.weightedRate}>{(rate()*question.Weight).toFixed(2)}</span>
       </>)}
