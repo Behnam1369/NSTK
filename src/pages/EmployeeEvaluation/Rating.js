@@ -2,7 +2,7 @@ import { IoStar } from "react-icons/io5";
 import style from "./Rating.module.scss";
 import { useState } from "react";
 
-export default function Rating({ question, iduser, onRate }) {
+export default function Rating({ question, iduser, isExpired, onRate }) {
   let numbers = [1,2,3,4,5];
   const [hoveringNumber, setHoveringNumber] = useState(0);
 
@@ -43,8 +43,10 @@ export default function Rating({ question, iduser, onRate }) {
           /> 
       ))}
       <span className={style.rate}>{rate()}</span>
-      <span className={style.weight}>{question.Weight.toFixed(2)}</span>
-      <span className={style.weightedRate}>{(rate()*question.Weight).toFixed(2)}</span>
+      {iduser == 1 && (<>
+        <span className={style.weight}>{question.Weight.toFixed(2)}</span>
+        <span className={style.weightedRate}>{(rate()*question.Weight).toFixed(2)}</span>
+      </>)}
     </div>
   )
 }

@@ -42,6 +42,7 @@ export default function EmployeeEvaluation() {
   }
 
   const handlePrint = (e, idemployeeevaluation) => {
+    console.log(idemployeeevaluation)
     e.preventDefault();
     if (idemployeeevaluation) {
       window.parent.postMessage(
@@ -61,7 +62,9 @@ export default function EmployeeEvaluation() {
 
   return (
     <ul className={style.evaluations}>
-      {evaluations.map((evaluation) => (
+      {evaluations.filter(evaluation => evaluation.related_users.length > 0)
+                  .sort((a,b) => b.employee_evaluation.IdEmployeeEvaluation - a.employee_evaluation.IdEmployeeEvaluation)
+                  .map((evaluation) => (
         <li key={evaluation.employee_evaluation.IdEmployeeEvaluation}>
           <h2>
             {evaluation.employee_evaluation.Title} 
