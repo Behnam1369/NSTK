@@ -15,25 +15,24 @@ export default function EmployeeEvaluation() {
     const getdate = async () => {
       await axios.get(`${host}/users/${iduser}/employee_evaluations`)
       .then((res) => setEvaluations(
-        res.data.sort((a,b) => a.employee_evaluation.IdEmployeeEvaluation < b.employee_evaluation.IdEmployeeEvaluation)
+        res.data.sort((a,b) => a.Quarter < b.Quarter)
       ))
       window.parent.postMessage({ title: "loaded", tabno }, "*");
     }
     getdate();
   },[])
 
-  const ratable = (user) =>{
+  const ratable = (user, quarter) =>{
+    if (evaluations[0].Quarter != quarter) return false
     if (iduser == user.IdUser) return false
-    if (user.ManagerSubmitDate) return false
-    if (user.IdManager0 && iduser == user.IdManager0 &&  user.ManagerSubmitDate0 == null) return true
-    if (user.IdManager && iduser == user.IdManager &&  user.ManagerSubmitDate == null && (user.IdManager0 == null || user.ManagerSubmitDate0 != null)) return true
+    return true;
   }
 
-  const handleOpen = (val) => {
+  const handleOpen = (iduser, quarter) => {
     window.parent.postMessage(
       {
         title: "evaluation",
-        args: { idemploymeeevaluationuser: val },
+        args: { iduser, quarter },
         tabTitle: `فرم ارزیابی عملکرد`,
         tabno,
       },
@@ -41,46 +40,49 @@ export default function EmployeeEvaluation() {
     );
   }
 
-  const handlePrint = (e, idemployeeevaluation) => {
-    console.log(idemployeeevaluation)
+  const handlePrint = (e, quarter) => {
     e.preventDefault();
-    if (idemployeeevaluation) {
-      window.parent.postMessage(
-        {
-          title: "print",
-          endpoint: "PrintEmployeeEvaluationList",
-          args: { idemployeeevaluation },
-          tabTitle: `چاپ نتیجه ارزیابی عملکرد`,
-          tabno,
-        },
-        "*"
-      );
-    } else {
-      alert("ابتدا سند را ذخیره کنید");
-    }
+    window.parent.postMessage(
+      {
+        title: "print",
+        endpoint: "PrintEmployeeEvaluationList",
+        args: { quarter },
+        tabTitle: `چاپ نتیجه ارزیابی عملکرد`,
+        tabno,
+      },
+      "*"
+    );
+  }
+
+  const users = (quarter)  => {
+    return JSON.parse(evaluations.find(evaluation => evaluation.Quarter == quarter).Users)
   }
 
   return (
     <ul className={style.evaluations}>
-      {evaluations.filter(evaluation => evaluation.related_users.length > 0)
-                  .sort((a,b) => b.employee_evaluation.IdEmployeeEvaluation - a.employee_evaluation.IdEmployeeEvaluation)
+      {evaluations.sort((a,b) => b.Quarter - a.Quarter)
                   .map((evaluation) => (
-        <li key={evaluation.employee_evaluation.IdEmployeeEvaluation}>
+        <li key={evaluation.Quarter}>
           <h2>
-            {evaluation.employee_evaluation.Title} 
+            ارزیابی {evaluation.FirstDayOfQuarter} لغایت {evaluation.LastDayOfQuarter}
             { ["1", "33", "46", "47", "118"].includes(iduser) &&
-              <IoPrint className={style.btnPrint} title="چاپ" onClick={(e) => handlePrint(e, evaluation.employee_evaluation.IdEmployeeEvaluation)} />
+              <IoPrint className={style.btnPrint} title="چاپ" onClick={(e) => handlePrint(e, evaluation.Quarter)} />
             }
+            
           </h2>
-          <ul className={style.users}>
-            {evaluation.related_users.sort((a,b) => a.IdUser < b.IdUser).map(user => (
-            <li key={user.IdEmployeeEvaluationUser}
-              className={ ratable(user) ? "ratable" : ""}
-              onClick={() => handleOpen(user.IdEmployeeEvaluationUser)}
+          {evaluation.DaysToGo > 0 && 
+              <h4>
+                {evaluation.DaysToGo} روز تا پایان دوره ارزیابی
+              </h4>
+            }
+          <ul className={style.Users}>
+            {users(evaluation.Quarter).sort((a,b) => a.IdUser < b.IdUser).map(user => (
+            <li key={user.IdUser}
+              className={ ratable(user, evaluation.Quarter) ? "ratable" : ""}
+              onClick={() => handleOpen(user.IdUser, evaluation.Quarter)}
             >
               <h3>{user.FullName}</h3>
-                { ratable(user) && <button className={style.formButton}>ارزیابی</button>}
-                { user.IdManager0 && user.ManagerSubmitDate0 == null && user.IdManager0 != iduser && <span>در انتظار ارزیابی اولیه</span>}
+                { ratable(user, evaluation.Quarter) && <button className={style.formButton}>ارزیابی</button>}
             </li>))}
           </ul>
         </li>)

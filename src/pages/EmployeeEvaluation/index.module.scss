@@ -31,6 +31,15 @@
     }
   }
 
+  h4 {
+    text-align: center;
+    font-weight: normal;
+    margin: 0;
+    border-bottom: solid 1px navy;
+    background-color: rgb(42, 42, 221);
+    color: white;
+  }
+
   ul {
     padding: 10px;
     display: flex;
