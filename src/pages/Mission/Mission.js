@@ -35,6 +35,7 @@ export default function Mission(props) {
   const [curs, setCurs] = useState([]);
   const [objectives, setObjectives] = useState([]);
   const [showMissionFee, setShowMissionFee] = useState(false);
+  const [externalMissioners, setExternalMissioners] = useState([]);
 
   const defaultData = {
     IdWorkMission: null,
@@ -90,8 +91,10 @@ export default function Mission(props) {
           setCurs(res.data.data.currencies);
 
           if (idmission) {
-            updateSelectedUsers(res.data.data.work_missioners, loaded_users);
-            setMissioners(res.data.data.work_missioners);
+            console.log(res.data.data.work_missioners);
+            updateSelectedUsers(res.data.data.work_missioners.filter(el => el.IdUser), loaded_users);
+            setMissioners(res.data.data.work_missioners.filter(el => el.IdUser));
+            setExternalMissioners(res.data.data.work_missioners.filter(el => !el.IdUser));
             setData(res.data.data.work_mission);
           }
         });
@@ -168,11 +171,11 @@ export default function Mission(props) {
     let doc = {
       ...data,
       iduser,
-      work_missioners: users
+      work_missioners: [...users
         .filter((user) => user.selected)
         .map((user) => {
           return { IdUser: user.IdUser };
-        }),
+        }), ...externalMissioners ],
     };
 
     await axios.post(`${host}/work_missions`, doc).then((res) => {
@@ -298,6 +301,17 @@ export default function Mission(props) {
     }
     setShowMissionFee(true);
   };
+
+  const handleAddExternalMissioners = (e) => {
+    e.preventDefault();
+    setExternalMissioners([...externalMissioners, { IdExternalMissioner: null, FullName: "" }]);
+  }
+
+  const handleRemoveExternalMissioner = (index) => {
+    let newArr = [...externalMissioners];
+    newArr.splice(index, 1);
+    setExternalMissioners(newArr);
+  }
 
   return (
     <div>
@@ -521,6 +535,40 @@ export default function Mission(props) {
               );
             })}
         </div>
+        <label></label>
+        <div>
+          <button 
+            className={style.formButton} 
+            style={{minWidth: "250PX", fontSize: "12px"}}
+            onClick={(e) => handleAddExternalMissioners(e)}
+            >افزودن نفرات خارج از سازمان
+          </button>
+        </div>
+        {externalMissioners.length> 0 && <><label>سایر نفرات اعزامی</label><div>
+          {externalMissioners.map((missioner, index) => {
+            return (
+              <div key={index} style={{ display: "flex", alignItems: "center", marginBottom:"7px" }}>
+                <input 
+                  type="text" 
+                  className={style.txt}
+                  value={missioner.FullName} 
+                  style={{minWidth: "250PX", fontSize: "12px"}}
+                  placeholder="نام و نام خانوادگی"
+                  onChange={(e) => {
+                    let newArr = [...externalMissioners];
+                    newArr[index].FullName = e.target.value;
+                    setExternalMissioners(newArr);
+                  }} 
+                />
+                <BsTrash
+                  className={style.removeExternalMissioner}
+                  title="Delete"
+                  onClick={() => handleRemoveExternalMissioner(index)}
+                />
+              </div>
+            );
+          })}
+        </div></>}
         <label>تنخواه دار</label>
         <Selector
           data={users
