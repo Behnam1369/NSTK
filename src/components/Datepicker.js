@@ -157,7 +157,7 @@ export default function Datepicker(props) {
     let m = 0;
     for (let i = 0; i < months.length; i++) {
       if (index > (y % 4 === 0 && i === 1 ? 29 : months[i].days)) {
-        index -= months[i].days;
+        index -= (y % 4 === 0 && i === 1 ? 29 : months[i].days);
         m += 1;
       } else {
         break;
