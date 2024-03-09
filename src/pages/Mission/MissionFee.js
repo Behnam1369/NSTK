@@ -40,6 +40,7 @@ export default function MissionFee({ idmission, iduser, onClose }) {
             IdWorkMission: idmission,
             MissionDays: el.MissionDays,
             MissionFeeRate: el.MissionFeeRate,
+            MissionFoodRate: el.MissionFoodRate,
             ActualMissionFee: el.ActualMissionFee,
           };
         })
@@ -70,8 +71,8 @@ export default function MissionFee({ idmission, iduser, onClose }) {
       data.map((item) => {
         if (item.IdUser === id) {
           let r = { ...item, [name]: val };
-          if (r.MissionFeeRate > 0 && r.MissionDays > 0) {
-            r.ActualMissionFee = r.MissionFeeRate * r.MissionDays;
+          if (r.MissionFeeRate > 0 && r.MissionFoodRate > 0 && r.MissionDays > 0) {
+            r.ActualMissionFee = (parseFloat(r.MissionFeeRate) + parseFloat(r.MissionFoodRate)) * parseFloat(r.MissionDays);
           } else {
             r.ActualMissionFee = "";
           }
@@ -94,14 +95,15 @@ export default function MissionFee({ idmission, iduser, onClose }) {
           <div className={style.heading}>تاریخ عزیمت</div>
           <div className={style.heading}>تاریخ بازگشت</div>
           <div className={style.heading}>تعداد روز ماموریت</div>
-          <div className={style.heading}>فی</div>
-          <div className={style.heading}>مبلغ</div>
+          <div className={style.heading}>نرخ روزانه حق ماموریت</div>
+          <div className={style.heading}>نرخ روزانه غذا</div>
+          <div className={style.heading}>مبلغ کل</div>
         </div>
         {data.length > 0 &&
           data.map((item) => (
             <div className={style.row} key={item.IdUser}>
               <div>
-                {item.Fname} {item.Lname}
+                {item.FullName}
               </div>
               <div>
                 {item.StartDateShamsi} {item.StartTime.substr(0, 5)}{" "}
@@ -124,6 +126,15 @@ export default function MissionFee({ idmission, iduser, onClose }) {
                   value={item.MissionFeeRate}
                   onChange={(val) =>
                     handleChange(val, item.IdUser, "MissionFeeRate")
+                  }
+                />
+              </div>
+              <div>
+                <AmountInput
+                  type="number"
+                  value={item.MissionFoodRate}
+                  onChange={(val) =>
+                    handleChange(val, item.IdUser, "MissionFoodRate")
                   }
                 />
               </div>
